@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="oscuro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060D1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MR">
+<meta name="description" content="Buses Chiriquí">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<title>MR · Buses</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root{
+    --bg:#060D1A;--bg2:#0A1628;--glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.03);
+    --border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.06);
+    --txt:#EEF4FF;--muted:#7A94B8;--blue:#0A84FF;--blue2:#5AC8FA;--blue3:#0040DD;
+    --ok:#30D158;--warn:#FF9F0A;--danger:#FF453A;--nav:rgba(8,16,32,.92);--purple:#BF5AF2;--teal:#64D2FF;
+    --shadow:0 4px 24px rgba(0,0,0,.4);--radius:20px;
+  }
+  html[data-tema="claro"]{
+    --bg:#EFF4FB;--bg2:#E2ECF9;--glass:rgba(255,255,255,.82);--glass2:rgba(255,255,255,.5);
+    --border:rgba(10,50,100,.12);--border2:rgba(10,50,100,.06);
+    --txt:#0B1E3A;--muted:#5A7399;--nav:rgba(255,255,255,.94);--purple:#A040C8;--teal:#0A84A8;
+    --shadow:0 4px 20px rgba(10,40,80,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    background:radial-gradient(900px 480px at 82% -8%,rgba(10,132,255,.14) 0%,transparent 52%),var(--bg);
+    color:var(--txt);min-height:100vh;padding-bottom:130px;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale
+  }
+  input,select,textarea{max-width:100%}
+  .vp-t,.vp-m,.ruta-nombre,.app-nombre,.viaje-head .dest,.plan-linea>div,.hint,.sale{overflow-wrap:anywhere;min-width:0}
+  .plan-linea>div{overflow:hidden}
+  .viaje-card,.card,.ruta-card{overflow:hidden}
+  .horarios{max-width:100%;flex-wrap:wrap}
+  .empresa-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+  .prox{flex-wrap:wrap}
+  .app{max-width:500px;margin:0 auto;padding:16px 16px 24px}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .logo{
+    width:42px;height:42px;border-radius:14px;
+    background:linear-gradient(135deg,var(--blue),var(--blue3));
+    display:grid;place-items:center;font-size:21px;flex-shrink:0;
+    box-shadow:0 6px 20px rgba(10,132,255,.4), inset 0 1px 0 rgba(255,255,255,.2)
+  }
+  .brand b{font-size:19px;display:block;letter-spacing:-.3px}
+  .brand span{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.2px}
+  .icon-btn{
+    width:42px;height:42px;border-radius:14px;border:1px solid var(--border);background:var(--glass);
+    color:var(--txt);font-size:16px;cursor:pointer;transition:.2s;display:grid;place-items:center;
+    backdrop-filter:blur(16px)
+  }
+  .icon-btn:active{transform:scale(.92)}
+
+  /* Cards */
+  .card{
+    background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(20px);
+    border-radius:var(--radius);padding:15px;margin-bottom:12px;
+    box-shadow:var(--shadow);transition:.3s
+  }
+  .card:active{transform:scale(.99)}
+  .section-title{font-size:10.5px;font-weight:800;letter-spacing:1.1px;color:var(--muted);text-transform:uppercase;margin:16px 2px 10px;display:flex;justify-content:space-between;align-items:center}
+
+  /* Hero */
+  .hero{
+    background:linear-gradient(160deg,rgba(10,132,255,.32) 0%,rgba(0,80,220,.18) 100%);
+    border:1px solid rgba(90,200,250,.3);border-radius:24px;padding:20px 18px 18px;margin-bottom:14px;
+    position:relative;overflow:hidden;box-shadow:0 12px 40px rgba(10,132,255,.18)
+  }
+  html[data-tema="claro"] .hero{background:linear-gradient(160deg,rgba(10,132,255,.14) 0%,rgba(10,132,255,.04) 100%)}
+  .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 50%);pointer-events:none}
+  .hero::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(90,200,250,.25),transparent 70%)}
+  .hero .tag{font-size:9.5px;font-weight:800;letter-spacing:1.2px;color:var(--blue2);text-transform:uppercase;position:relative;z-index:1}
+  .hero .ruta{font-size:15px;font-weight:800;margin-top:5px;display:flex;align-items:center;gap:8px;position:relative;z-index:1;letter-spacing:-.2px}
+  .hero .empresa{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;border-radius:999px;padding:3px 10px;margin-top:7px;position:relative;z-index:1;letter-spacing:.3px}
+  .hero .cuenta{
+    font-size:clamp(48px,14vw,60px);font-weight:800;font-variant-numeric:tabular-nums;
+    letter-spacing:-1px;line-height:1;margin:8px 0 4px;position:relative;z-index:1
+  }
+  .hero .cuenta small{font-size:.3em;font-weight:600;color:var(--muted)}
+  .hero .sale{font-size:12.5px;color:#B8D4F5;font-weight:600;position:relative;z-index:1;line-height:1.4}
+  html[data-tema="claro"] .hero .sale{color:#3A6A9A}
+  .chip-salida{
+    position:absolute;top:14px;right:14px;z-index:2;
+    background:rgba(255,255,255,.12);border-radius:999px;padding:5px 12px;
+    font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;backdrop-filter:blur(8px)
+  }
+
+  .aviso-salida{margin-bottom:10px;border-radius:14px;padding:12px 14px;font-size:12.5px;font-weight:800;display:none;align-items:center;gap:9px;animation:fadeSlide .4s ease}
+  .aviso-salida.show{display:flex}
+  .aviso-salida.sale-ya{background:rgba(255,69,58,.18);border:1px solid rgba(255,69,58,.4);color:var(--danger)}
+  .aviso-salida.sale-pronto{background:rgba(255,159,10,.14);border:1px solid rgba(255,159,10,.35);color:var(--warn)}
+  @keyframes fadeSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+  /* Planificador */
+  .plan{border:1px solid rgba(90,200,250,.2);background:linear-gradient(180deg,rgba(10,132,255,.08),transparent)}
+  html[data-tema="claro"] .plan{background:linear-gradient(180deg,rgba(10,132,255,.05),transparent)}
+  .plan-titulo{font-size:16px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px;letter-spacing:-.2px}
+  .plan-search{display:flex;gap:8px}
+  .plan-search input{
+    flex:1;min-width:0;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:14px;
+    padding:14px 15px;color:inherit;font-size:15px;font-weight:700;outline:none;font-family:inherit;transition:.2s
+  }
+  .plan-search input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.2)}
+  html[data-tema="claro"] .plan-search input{background:rgba(255,255,255,.9)}
+  .plan-chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .plan-chip{
+    background:var(--glass);border:1px solid var(--border);color:var(--txt);border-radius:999px;
+    padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;backdrop-filter:blur(8px)
+  }
+  .plan-chip:active{transform:scale(.95)}
+  .plan .row{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .plan input[type="time"]{
+    width:auto;flex:0 0 auto;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:12px;
+    padding:11px 13px;color:inherit;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;outline:none;font-family:inherit
+  }
+  html[data-tema="claro"] .plan input[type="time"]{background:rgba(255,255,255,.9)}
+  .plan .hint{font-size:12.5px;color:var(--muted);font-weight:600;flex:1;line-height:1.45}
+  .plan-res{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+  .plan-linea{
+    display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:13px;
+    background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:12.5px;font-weight:700;
+    backdrop-filter:blur(8px)
+  }
+  html[data-tema="claro"] .plan-linea{background:rgba(255,255,255,.8)}
+  .plan-linea .t{font-weight:900;font-variant-numeric:tabular-nums;font-size:14px;color:var(--blue2)}
+  .plan-linea.miss{opacity:.45}
+  .plan-linea.miss .t{color:var(--muted)}
+
+  /* Viaje timeline */
+  .viaje-card{border-radius:16px;border:1px solid var(--border);background:var(--glass);padding:15px;margin-bottom:10px;backdrop-filter:blur(12px);animation:fadeSlide .4s ease}
+  .viaje-card.mejor{border-color:rgba(48,209,88,.5);box-shadow:0 0 0 1px rgba(48,209,88,.25), 0 12px 30px rgba(48,209,88,.1)}
+  .viaje-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .viaje-head .dest{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;min-width:0;letter-spacing:-.2px}
+  .viaje-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+  .viaje-badge{font-size:10px;font-weight:800;border-radius:999px;padding:4px 9px;background:rgba(255,255,255,.06);border:1px solid var(--border);font-variant-numeric:tabular-nums;letter-spacing:.2px}
+  html[data-tema="claro"] .viaje-badge{background:rgba(10,50,100,.06)}
+  .viaje-badge.best{background:rgba(48,209,88,.16);border-color:rgba(48,209,88,.4);color:#6DDB8B}
+  html[data-tema="claro"] .viaje-badge.best{color:#148A36}
+  .viaje-pasos{margin-top:13px;padding-left:22px;position:relative}
+  .vpaso{position:relative;padding:0 0 16px}
+  .vpaso:last-child{padding-bottom:0}
+  .vpaso::before{content:'';position:absolute;left:-15px;top:14px;bottom:0;width:2px;background:var(--border);border-radius:2px}
+  .vpaso:last-child::before{display:none}
+  .vpaso::after{
+    content:'';position:absolute;left:-19px;top:4px;width:10px;height:10px;border-radius:50%;
+    background:var(--blue);border:2px solid var(--bg);box-sizing:border-box;
+    box-shadow:0 0 8px rgba(10,132,255,.5)
+  }
+  .vpaso.walk::after{background:var(--muted);box-shadow:none}
+  .vpaso.espera::after{background:var(--warn);box-shadow:0 0 8px rgba(255,159,10,.5)}
+  .vpaso.llega::after{background:var(--ok);box-shadow:0 0 8px rgba(48,209,88,.5)}
+  .vpaso .vp-t{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .vpaso .vp-m{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;line-height:1.5}
+  .vpaso .vp-h{font-weight:900;font-variant-numeric:tabular-nums;color:var(--blue2)}
+
+  /* Tabs */
+  .tabs{display:flex;gap:7px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    flex:0 0 auto;background:var(--glass);border:1px solid var(--border);color:var(--txt);
+    border-radius:999px;padding:8px 15px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap
+  }
+  .tab.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 5px 16px rgba(10,132,255,.35)}
+  .tab:active{transform:scale(.96)}
+
+  /* Rutas */
+  .ruta-card{display:flex;gap:12px;align-items:flex-start;padding:14px;margin-bottom:10px;animation:fadeSlide .3s ease}
+  .ruta-ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+  .ruta-body{flex:1;min-width:0}
+  .ruta-nombre{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:7px;flex-wrap:wrap;letter-spacing:-.2px}
+  .empresa-chip{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;border-radius:999px;padding:3px 9px;letter-spacing:.3px}
+  .empresa-chip::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+  .ruta-detalle{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:3px}
+  .prox{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+  .prox .en{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .prox .en small{font-size:12px;font-weight:600;color:var(--muted)}
+  .prox .salida{font-size:11px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+  .prox.cerca .en{color:var(--ok)}
+  .prox.muy-cerca .en{color:var(--warn)}
+  .prox.urgent .en{color:var(--danger)}
+
+  .horarios{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+  .hora-chip{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;padding:4px 7px;letter-spacing:.2px}
+  .hora-chip.pasada{opacity:.25;text-decoration:line-through}
+  .hora-chip.proxima{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 3px 10px rgba(10,132,255,.3)}
+  .hora-chip.saliendo{background:var(--ok);border-color:var(--ok);color:#04280F;animation:pulso 1.2s infinite}
+  @keyframes pulso{0%,100%{opacity:1}50%{opacity:.5}}
+
+  .badge{display:inline-flex;font-size:9.5px;font-weight:800;border-radius:999px;padding:3px 8px;text-transform:uppercase;letter-spacing:.4px}
+  .badge.bus{background:rgba(10,132,255,.22);color:#7CC4FF}
+  .badge.taxi{background:rgba(255,159,10,.18);color:#FF9F0A}
+  .badge.pie{background:rgba(48,209,88,.16);color:var(--ok)}
+  html[data-tema="claro"] .badge.bus{color:#0055B8}
+  html[data-tema="claro"] .badge.pie{color:#1A7A38}
+
+  /* Buttons */
+  .btn{
+    background:linear-gradient(135deg,var(--blue),var(--blue3));color:#fff;border:0;border-radius:14px;
+    padding:13px 16px;font-size:14px;font-weight:800;cursor:pointer;width:100%;transition:.2s;
+    font-family:inherit;letter-spacing:-.1px;
+    box-shadow:0 6px 18px rgba(10,132,255,.35), inset 0 1px 0 rgba(255,255,255,.15)
+  }
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:var(--glass);border:1px solid var(--border);box-shadow:none;color:var(--txt)}
+  .btn.small{padding:8px 11px;font-size:12px;border-radius:10px;width:auto;flex-shrink:0;box-shadow:none}
+  .btn-row{display:flex;gap:8px}
+  .chip-btn{
+    background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--txt);border-radius:999px;
+    padding:10px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;
+    display:inline-flex;align-items:center;gap:6px;backdrop-filter:blur(8px)
+  }
+  html[data-tema="claro"] .chip-btn{background:rgba(255,255,255,.88)}
+  .chip-btn:active{transform:scale(.95)}
+  .chip-btn .precio{color:var(--warn);font-variant-numeric:tabular-nums;font-weight:800}
+  .chip-row{display:flex;flex-wrap:wrap;gap:7px}
+
+  /* Bottom nav */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:80;background:var(--nav);
+    border-top:1px solid var(--border);backdrop-filter:blur(24px);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom))
+  }
+  .bottom-nav .inner{max-width:500px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+  .nav-btn{
+    display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;
+    color:var(--muted);font-size:9px;font-weight:700;padding:8px 2px 6px;border-radius:14px;
+    cursor:pointer;transition:.25s;font-family:inherit;position:relative;letter-spacing:.1px
+  }
+  .nav-btn .ico{font-size:20px;line-height:1;transition:transform .25s}
+  .nav-btn.on{color:var(--blue)}
+  .nav-btn.on .ico{transform:translateY(-3px) scale(1.15)}
+  .nav-btn.on::after{
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:20px;height:3px;border-radius:0 0 3px 3px;background:var(--blue);box-shadow:0 2px 8px rgba(10,132,255,.5)
+  }
+  .nav-btn:active{transform:scale(.88)}
+
+  .fab{
+    position:fixed;right:calc(50% - 250px + 18px);bottom:96px;z-index:70;width:58px;height:58px;
+    border-radius:20px;border:0;cursor:pointer;
+    background:linear-gradient(135deg,var(--blue),var(--blue3));
+    color:#fff;font-size:24px;
+    box-shadow:0 12px 30px rgba(10,132,255,.5), inset 0 1px 0 rgba(255,255,255,.2);
+    transition:.2s;display:none;place-items:center
+  }
+  .fab.show{display:grid;animation:fadeSlide .3s ease}
+  .fab:active{transform:scale(.88) rotate(-6deg)}
+  @media (max-width:540px){.fab{right:18px}}
+
+  /* Sheets */
+  .mask{position:fixed;inset:0;background:rgba(3,8,18,.75);backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;z-index:100}
+  .mask.show{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .sheet{
+    background:linear-gradient(180deg,#0C2244 0%,#081528 100%);
+    border:1px solid var(--border);border-radius:24px 24px 0 0;
+    padding:20px 18px 28px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;color:#EAF2FF;
+    animation:slideUp .3s cubic-bezier(.2,.9,.3,1);position:relative
+  }
+  .sheet::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:36px;height:4px;border-radius:99px;background:rgba(255,255,255,.15)}
+  @keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+  html[data-tema="claro"] .sheet{background:linear-gradient(180deg,#FAFDFF 0%,#E8F0FA 100%);color:#0B1E3A}
+  .sheet h3{font-size:17px;margin-bottom:4px;letter-spacing:-.3px}
+  .sheet .hint{font-size:11.5px;color:#7A94B8;font-weight:600;margin-bottom:12px;line-height:1.5}
+  html[data-tema="claro"] .sheet .hint{color:#5A7399}
+  label{display:block;font-size:10px;font-weight:800;color:#7A94B8;letter-spacing:.8px;text-transform:uppercase;margin:12px 0 5px}
+  html[data-tema="claro"] label{color:#5A7399}
+  input,select,textarea{
+    width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;
+    padding:11px 13px;color:inherit;font-size:15px;font-weight:600;outline:none;font-family:inherit;transition:.2s
+  }
+  html[data-tema="claro"] input,html[data-tema="claro"] select,html[data-tema="claro"] textarea{background:rgba(255,255,255,.95);border-color:rgba(10,50,100,.12)}
+  input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,132,255,.18)}
+  select option{background:#0B1E3A;color:#EAF2FF}
+  html[data-tema="claro"] select option{background:#fff;color:#0B1E3A}
+
+  .gen-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  .gen-row input{padding:10px 9px;font-size:13.5px}
+  .gen-btn{margin-top:8px}
+
+  .fila{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;
+    background:rgba(255,255,255,.04);border:1px solid var(--border);margin-bottom:8px;transition:.2s
+  }
+  html[data-tema="claro"] .fila{background:rgba(255,255,255,.78)}
+  .fila .info{flex:1;min-width:0}
+  .fila .info b{font-size:13px;display:block;letter-spacing:-.1px}
+  .fila .info span{font-size:11px;color:var(--muted);font-weight:600}
+  .empty{text-align:center;color:var(--muted);font-weight:700;font-size:12.5px;padding:20px 12px;line-height:1.6}
+
+  .toast{
+    position:fixed;bottom:108px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:linear-gradient(135deg,#0E2A52,#0A1F3D);border:1px solid rgba(255,255,255,.12);color:#EAF2FF;
+    padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;
+    transition:.35s cubic-bezier(.2,.9,.3,1);box-shadow:0 12px 32px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* Gastos */
+  .gasto-total{
+    display:flex;justify-content:space-between;align-items:baseline;
+    background:linear-gradient(135deg,rgba(10,132,255,.12),rgba(10,132,255,.04));
+    border:1px solid rgba(90,200,250,.22);border-radius:16px;padding:14px 15px;margin-bottom:12px
+  }
+  .gasto-total .num{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .gasto-total .lab{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  .bchart{display:flex;gap:6px;align-items:flex-end;height:110px;padding:6px 2px 0}
+  .bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+  .bcol .barra{width:100%;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--blue2),var(--blue));min-height:3px;transition:height .9s cubic-bezier(.3,1.2,.4,1);height:0}
+  .bcol .d{font-size:9px;font-weight:800;color:var(--muted)}
+  .gasto-form{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .gasto-form .full{grid-column:1/-1}
+
+  .stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+  .stat-mini{
+    background:linear-gradient(135deg,rgba(48,209,88,.1),rgba(48,209,88,.02));
+    border:1px solid rgba(48,209,88,.18);border-radius:14px;padding:11px 6px;text-align:center
+  }
+  .stat-mini .n{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ok);letter-spacing:-.3px}
+  .stat-mini .l{font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+
+  .bajada-item{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);margin-bottom:8px;transition:.2s}
+  html[data-tema="claro"] .bajada-item{background:rgba(255,255,255,.78)}
+  .bajada-item .donde{font-size:13px;font-weight:800}
+  .bajada-item .consejo{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:3px;line-height:1.4}
+  .bajada-item .pasos{font-size:10px;font-weight:800;color:var(--blue2);margin-top:4px}
+  .radio-mini{width:17px;height:17px;accent-color:var(--blue);margin-top:3px;flex-shrink:0;cursor:pointer}
+
+  .nota-row{display:flex;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);margin-bottom:8px;align-items:flex-start}
+  html[data-tema="claro"] .nota-row{background:rgba(255,255,255,.78)}
+  .nota-row .txt{flex:1;font-size:12.5px;font-weight:600;line-height:1.45}
+  .nota-row .hora{font-size:10px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+
+  .modo-hora{position:fixed;inset:0;z-index:200;display:none;background:radial-gradient(900px 500px at 50% 0%,rgba(10,132,255,.12) 0%,transparent 60%),var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;user-select:none}
+  .modo-hora.show{display:flex}
+  .modo-hora .grande{font-size:clamp(88px,26vw,150px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;color:var(--txt)}
+  .modo-hora .grande small{font-size:.35em;color:var(--muted);font-weight:600}
+  .modo-hora .seg{font-size:24px;font-weight:800;color:var(--blue2);font-variant-numeric:tabular-nums;margin-top:-6px}
+  .modo-hora .sub{font-size:15px;font-weight:700;color:var(--muted);text-align:center;padding:0 24px;line-height:1.4}
+  .modo-hora .prox-bus{margin-top:8px;background:var(--glass);border:1px solid var(--border);border-radius:999px;padding:12px 22px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;max-width:90vw;text-align:center;backdrop-filter:blur(12px)}
+  .modo-hora .salir-hint{position:absolute;bottom:24px;font-size:11px;font-weight:600;color:var(--muted)}
+
+  .sec{display:none}
+  .sec.on{display:block;animation:fadeSlide .35s ease}
+
+  .presu-bar{height:16px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0 8px}
+  html[data-tema="claro"] .presu-bar{background:rgba(10,50,100,.08)}
+  .presu-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ok),#7CE495);width:0;transition:width 1s cubic-bezier(.3,1.2,.4,1)}
+  .presu-fill.warn{background:linear-gradient(90deg,var(--warn),#FFC46B)}
+  .presu-fill.over{background:linear-gradient(90deg,var(--danger),#FF8A80)}
+  .presu-txt{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .presu-txt .q{color:var(--muted)}
+  .hero-origen{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:3px;position:relative;z-index:1}
+  .app-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2)}
+  .app-row:last-child{border-bottom:none}
+  .app-ico{font-size:19px;width:32px;text-align:center}
+  .app-nombre{flex:1;font-size:13.5px;font-weight:700;min-width:0}
+  .app-row input{width:88px;text-align:right;flex:0 0 auto}
+  .ahorro-ok{color:var(--ok)}
+  .mh-close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:5;backdrop-filter:blur(8px);transition:.2s}
+  .mh-close:active{transform:scale(.92)}
+
+  @media (max-height:500px) and (orientation:landscape){
+    .modo-hora{gap:2px;padding:8px 12px;justify-content:center}
+    .modo-hora .grande{font-size:clamp(60px,20vh,110px)}
+    .modo-hora .seg{font-size:16px;margin-top:-2px}
+    .modo-hora .sub{font-size:12px}
+    .modo-hora .prox-bus{padding:8px 16px;font-size:12px;margin-top:2px;max-width:94vw}
+    .modo-hora .salir-hint{display:none}
+  }
+
+  /* Bitácora */
+  #bitacoraHoy{line-height:1.5}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+      <div class="brand">
+      <div class="logo">🚌</div>
+      <div>
+        <b>MR</b>
+        <span id="subTitulo">¿A qué hora sale mi bus?</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="icon-btn" id="btnTema" onclick="toggleTema()" title="Modo claro/oscuro">🌙</button>
+      <button class="icon-btn" onclick="abrirModoHora()" title="Solo la hora en grande">🕒</button>
+    </div>
+  </header>
+
+  <!-- ========== INICIO ========== -->
+  <section class="sec on" id="sec-inicio">
+    <div class="hero" id="hero">
+      <div class="tag">Próxima salida</div>
+      <div class="hero-origen" id="heroOrigen">Desde Dolega</div>
+      <div class="ruta" id="heroRuta">Cargando…</div>
+      <div id="heroEmpresa"></div>
+      <div class="cuenta" id="heroCuenta">--<small>:--</small></div>
+      <div class="sale" id="heroSale">Agrega tus horarios en ⚙️ Ajustes</div>
+      <div class="chip-salida" id="heroChip">--:--</div>
+    </div>
+    <div class="aviso-salida" id="avisoSalida"></div>
+
+    <!-- Planificador de viajes con transbordo -->
+    <div class="card plan">
+      <div class="plan-titulo">🗺️ ¿A dónde vas?</div>
+      <div class="plan-search">
+        <input type="text" id="planDestino" list="dlDestinos" placeholder="Ej: UTP, Campus…" onkeydown="if(event.key==='Enter')buscarViaje()">
+        <datalist id="dlDestinos"></datalist>
+        <button class="btn" style="flex:0 0 auto;width:auto;padding:12px 16px" onclick="buscarViaje()">Buscar</button>
+      </div>
+      <div class="plan-chips" id="planChips"></div>
+      <div class="row">
+        <input type="time" id="planHora" onchange="pintarPlan()">
+        <div class="hint" id="planHint">Hora en que sales de casa</div>
+      </div>
+      <div class="plan-res" id="planRes"></div>
+      <a class="btn ghost" style="margin-top:10px;display:block;text-align:center;text-decoration:none" id="btnMaps" href="https://www.google.com/maps/dir/Dolega,+Chiriqui,+Panama/Terminal+de+Transporte+Publico,+Avenida+Joseph+Halphen,+David,+Chiriqui,+Panama/Universidad+Tecnologica+de+Panama,+Barrio+Lassonde,+David,+Chiriqui,+Panama" target="_blank" rel="noopener">🗺️ Abrir en Google Maps</a>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" onclick="setFiltro('todos',this)">Todos</button>
+      <button class="tab" onclick="setFiltro('bus',this)">🚌 Bus</button>
+      <button class="tab" onclick="setFiltro('taxi',this)">🚕 Taxi</button>
+      <button class="tab" onclick="setFiltro('pie',this)">🚶 A pie</button>
+    </div>
+    <div id="listaRutas"></div>
+
+    <div class="section-title">Mis últimos viajes</div>
+    <div id="listaViajes"></div>
+  </section>
+
+  <!-- ========== BITÁCORA ========== -->
+  <section class="sec" id="sec-bitacora">
+    <div class="card" style="margin-top:4px;background:linear-gradient(135deg,#3A8FFF18,#3A8FFF08);border-left:3px solid #3A8FFF">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">📖 Mi día de hoy</div>
+      <div id="bitacoraHoy" style="font-size:13px;opacity:.85">Cargando…</div>
+      <button class="btn" style="margin-top:10px;width:100%" onclick="abrirViaje()">🚌 Registrar viaje ahora</button>
+    </div>
+    <div class="section-title">Historial</div>
+    <div class="tabs" style="margin-bottom:8px">
+      <button class="tab on" onclick="setFiltroBitacora('todos',this)">Todos</button>
+      <button class="tab" onclick="setFiltroBitacora('bus',this)">🚌 Bus</button>
+      <button class="tab" onclick="setFiltroBitacora('taxi',this)">🚕 Taxi</button>
+      <button class="tab" onclick="setFiltroBitacora('pie',this)">🚶 A pie</button>
+    </div>
+    <div id="listaBitacora"></div>
+  </section>
+
+  <!-- ========== UNIVERSIDAD ========== -->
+  <section class="sec" id="sec-uni">
+    <div id="uniProxima"></div>
+    <div class="section-title">Mi horario semanal</div>
+    <div id="uniHorario"></div>
+    <button class="btn ghost" onclick="abrirSheet('claseSheet')" style="margin-top:10px">＋ Agregar clase</button>
+    <div class="section-title">Notas</div>
+    <div class="row" style="gap:8px">
+      <input type="text" id="inpNota" placeholder="Escribe una nota…" onkeydown="if(event.key==='Enter')guardarNota()">
+      <button class="btn" style="width:auto;flex:0 0 auto" onclick="guardarNota()">✍️</button>
+    </div>
+    <div id="listaNotas" style="margin-top:10px"></div>
+  </section>
+
+  <!-- ========== BAJADAS ========== -->
+  <section class="sec" id="sec-bajadas">
+    <div class="section-title" style="margin-top:0">Tiempo caminando</div>
+    <div class="stat-row">
+      <div class="stat-mini"><div class="n" id="camHoy">0</div><div class="l">min hoy</div></div>
+      <div class="stat-mini"><div class="n" id="camSem">0</div><div class="l">min semana</div></div>
+      <div class="stat-mini"><div class="n" id="camTot">0</div><div class="l">total</div></div>
+    </div>
+    <button class="btn" onclick="abrirCaminata()">🚶 Registrar caminata</button>
+    <div class="section-title">Mis bajadas</div>
+    <div id="listaBajadas"></div>
+    <button class="btn ghost" onclick="abrirEditorBajada()">＋ Agregar bajada</button>
+    <div class="section-title">Historial de caminatas</div>
+    <div id="listaCaminatas"></div>
+  </section>
+
+  <!-- ========== GASTOS ========== -->
+  <section class="sec" id="sec-gastos">
+    <div class="card" style="margin-top:4px">
+      <div class="section-title" style="margin:0 0 6px">Mi plata de hoy</div>
+      <div id="dineroContenido"></div>
+    </div>
+    <div class="gasto-total" style="margin-top:4px">
+      <div><div class="lab">Esta semana</div><div class="num" id="gastoSemana">$0,00</div></div>
+      <div style="text-align:right"><div class="lab">Hoy</div><div style="font-size:20px;font-weight:850;font-variant-numeric:tabular-nums" id="gastoHoy">$0,00</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 2px">Presupuesto</div>
+      <div id="presuContenido"></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 2px">Ahorro 🐷</div>
+      <div id="ahorroContenido"></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 4px">Últimos 7 días</div>
+      <div class="bchart" id="gastoChart"></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 8px">Pago rápido</div>
+      <div class="chip-row" id="frecuentesRow"></div>
+      <div class="section-title" style="margin:14px 0 8px">Otro gasto</div>
+      <div class="gasto-form">
+        <input type="number" id="gMonto" step="0.05" min="0" placeholder="Monto $">
+        <select id="gMetodo">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="Monedero">Monedero / app</option>
+        </select>
+        <select id="gTipo" class="full">
+          <option value="bus">🚌 Bus</option>
+          <option value="taxi">🚕 Taxi</option>
+          <option value="uber">📱 Uber</option>
+          <option value="indriver">🚗 inDriver</option>
+          <option value="pie">🚶 A pie (sin gasto)</option>
+          <option value="otro">💳 Otro</option>
+        </select>
+        <input type="text" id="gNota" class="full" placeholder="Nota opcional">
+        <button class="btn full" style="grid-column:1/-1;margin-top:2px" onclick="guardarGasto()">＋ Guardar gasto</button>
+      </div>
+    </div>
+    <div class="section-title">Historial de gastos</div>
+    <div id="listaGastos"></div>
+  </section>
+
+  <!-- ========== AJUSTES ========== -->
+  <section class="sec" id="sec-ajustes">
+    <div class="card" style="margin-top:4px">
+      <div class="section-title" style="margin:0 0 10px">Mi zona 📍</div>
+      <label style="display:block;font-size:10.5px;font-weight:900;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin:0 0 4px">¿Desde dónde sales normalmente?</label>
+      <input type="text" id="zSalida" placeholder="ej: Dolega">
+      <button class="btn" style="margin-top:10px" onclick="guardarZona()">📍 Guardar zona</button>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">Apariencia</div>
+      <div class="btn-row">
+        <button class="btn ghost" onclick="setTema('oscuro')">🌙 Oscuro</button>
+        <button class="btn ghost" onclick="setTema('claro')">☀️ Claro</button>
+      </div>
+      <button class="btn ghost" style="margin-top:8px" onclick="abrirModoHora()">🕒 Modo solo hora</button>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">Presupuesto de transporte</div>
+      <label style="display:block;font-size:10.5px;font-weight:900;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin:0 0 4px">Monto ($)</label>
+      <input type="number" id="prMonto" step="0.50" min="0" placeholder="ej: 15.00">
+      <label style="display:block;font-size:10.5px;font-weight:900;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin:10px 0 4px">Período</label>
+      <select id="prPeriodo">
+        <option value="semana">Por semana</option>
+        <option value="mes">Por mes</option>
+      </select>
+      <button class="btn" style="margin-top:10px" onclick="guardarPresupuesto()">💰 Guardar presupuesto</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="quitarPresupuesto()">Quitar presupuesto</button>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 6px">Transportes cuando no hay bus</div>
+      <div id="appsEdit"></div>
+      <div class="hint" style="font-size:11.5px;color:var(--muted);font-weight:600;margin-top:8px">Taxi, Uber o inDriver con su precio. Aparecen en el planificador.</div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">Mis horarios</div>
+      <button class="btn" onclick="abrirEditor()">⚙️ Editar rutas y horarios</button>
+      <div id="listaRutasEdit" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">Precios frecuentes</div>
+      <div class="hint" style="font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:8px">Botones rápidos de pago en Gastos.</div>
+      <div class="chip-row" id="frecuentesEdit"></div>
+      <button class="btn ghost" style="margin-top:10px" onclick="abrirFrecuente()">＋ Agregar precio</button>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">🎨 Color de la app</div>
+      <div id="temasEdit" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">📤 Mis datos</div>
+      <button class="btn" onclick="exportarDatos()">📥 Descargar mis datos (.json)</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="document.getElementById('inpImportar').click()">📤 Importar datos</button>
+      <input type="file" id="inpImportar" accept=".json" style="display:none" onchange="importarDatos(this)">
+      <div class="hint" style="margin-top:8px">El archivo .json tiene tus rutas, viajes, gastos, clases y todo. Guárdalo por si borras el navegador.</div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 10px">Datos</div>
+      <button class="btn ghost" onclick="restablecerDemo()">🔄 Volver a los ejemplos</button>
+      <button class="btn ghost" style="margin-top:8px;color:#FF8A80" onclick="borrarTodo()">🗑️ Borrar todo mi historial</button>
+    </div>
+    <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
+      MR v9 · Tus datos se guardan solo en este navegador.
+    </div>
+  </section>
+</div>
+
+<button class="fab show" id="fabViaje" onclick="abrirViaje()" title="Ya agarré el bus">🚌</button>
+
+<nav class="bottom-nav">
+  <div class="inner">
+    <button class="nav-btn on" data-sec="inicio" onclick="irSec('inicio',this)"><span class="ico">🏠</span>Inicio</button>
+    <button class="nav-btn" data-sec="uni" onclick="irSec('uni',this)"><span class="ico">📚</span>Uni</button>
+    <button class="nav-btn" data-sec="bitacora" onclick="irSec('bitacora',this)"><span class="ico">📖</span>Bitácora</button>
+    <button class="nav-btn" data-sec="gastos" onclick="irSec('gastos',this)"><span class="ico">💸</span>Gastos</button>
+    <button class="nav-btn" data-sec="ajustes" onclick="irSec('ajustes',this)"><span class="ico">⚙️</span>Ajustes</button>
+  </div>
+</nav>
+
+<!-- Sheet viaje -->
+<div class="mask" id="viajeMask" onclick="cerrarViaje(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Registrar viaje</h3>
+    <div class="hint">¿En qué bus te fuiste y a qué hora saliste? Queda en tu historial.</div>
+    <label>Ruta</label>
+    <select id="vRuta"></select>
+    <label>Hora en que agarraste el bus</label>
+    <input type="time" id="vHora">
+    <label>Nota (opcional)</label>
+    <input type="text" id="vNota" placeholder="ej: iba lleno, salió tarde…">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarViaje()">Guardar viaje</button>
+      <button class="btn ghost" onclick="cerrarViaje()" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet clase (universidad) -->
+<div class="mask" id="claseSheet" onclick="cerrarSheet('claseSheet',event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Agregar clase</h3>
+    <div class="hint">Materia, día y hora de inicio. Te digo cuándo salir de casa.</div>
+    <label>Materia</label>
+    <input type="text" id="inpClaseNombre" placeholder="ej: Cálculo II">
+    <label>Día</label>
+    <select id="inpClaseDia">
+      <option value="1">Lunes</option><option value="2">Martes</option>
+      <option value="3">Miércoles</option><option value="4">Jueves</option>
+      <option value="5">Viernes</option><option value="6">Sábado</option>
+      <option value="0">Domingo</option>
+    </select>
+    <label>Hora de inicio</label>
+    <input type="time" id="inpClaseHora">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarClase()">Guardar clase</button>
+      <button class="btn ghost" onclick="cerrarSheet('claseSheet')" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet caminata -->
+<div class="mask" id="caminataMask" onclick="cerrarCaminata(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Registrar caminata</h3>
+    <div class="hint">¿Cuánto tiempo caminaste? Se suma a tus estadísticas.</div>
+    <label>Minutos caminados</label>
+    <input type="number" id="cMin" min="1" placeholder="ej: 12">
+    <label>¿Por dónde? (opcional)</label>
+    <select id="cBajada"></select>
+    <label>Nota (opcional)</label>
+    <input type="text" id="cNota" placeholder="ej: subida pesada, buen atajo…">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarCaminata()">Guardar caminata</button>
+      <button class="btn ghost" onclick="cerrarCaminata()" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet ruta -->
+<div class="mask" id="editorMask" onclick="cerrarEditor(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3 id="edTitulo">Nueva ruta</h3>
+    <div class="hint">Pon los buses que tomas siempre.</div>
+    <label>Empresa / operadora</label>
+    <select id="edEmpresa">
+      <option value="">(sin empresa)</option>
+      <option value="UTP">UTP</option>
+      <option value="Lassonde">Lassonde</option>
+      <option value="Nuevo Amanecer">Nuevo Amanecer</option>
+      <option value="Dolega">Dolega</option>
+      <option value="Otra">Otra</option>
+    </select>
+    <label>Tipo de transporte</label>
+    <select id="edTipo">
+      <option value="bus">🚌 Bus / camioneta</option>
+      <option value="taxi">🚕 Taxi</option>
+      <option value="pie">🚶 A pie</option>
+    </select>
+    <label>Nombre de la ruta</label>
+    <input id="edNombre" placeholder="ej: Dolega → Terminal (opcional)">
+    <label>Origen (de dónde sale el bus)</label>
+    <input id="edOrigen" placeholder="ej: Dolega">
+    <label>Destino (a dónde llega)</label>
+    <input id="edDestino" placeholder="ej: Terminal">
+    <div id="genBox">
+      <label>Generar horarios (opcional)</label>
+      <div class="gen-row">
+        <input type="time" id="genDesde" value="06:00">
+        <input type="time" id="genHasta" value="08:30">
+        <input type="number" id="genCada" min="1" placeholder="cada X min" style="font-size:12.5px">
+      </div>
+      <button class="btn ghost small gen-btn" style="width:100%" onclick="generarHorarios()">⚡ Generar y llenar</button>
+    </div>
+    <label id="edHorariosLab">Horarios de salida (separados con coma)</label>
+    <input id="edHorarios" placeholder="ej: 06:15, 06:45, 07:15">
+    <label id="edDurLab">Duración del viaje (minutos)</label>
+    <input id="edDur" type="number" min="1" placeholder="ej: 25">
+    <label id="edCamLab">Caminas hasta la parada (minutos)</label>
+    <input id="edCam" type="number" min="0" placeholder="ej: 5">
+    <label>Precio del pasaje ($, opcional)</label>
+    <input id="edPrecio" type="number" step="0.05" min="0" placeholder="ej: 0.35">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarRutaEd()">Guardar ruta</button>
+      <button class="btn ghost" onclick="cerrarEditor()" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet bajada -->
+<div class="mask" id="bajadaMask" onclick="cerrarEditorBajada(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Bajada</h3>
+    <div class="hint">¿En qué parada te bajas y por dónde caminas?</div>
+    <label>Nombre del lugar</label>
+    <input id="bjLugar" placeholder="ej: Entrada Nueva">
+    <label>¿De qué bus te bajas? (o "camino")</label>
+    <input id="bjRuta" placeholder="ej: Bus 12 · Centro">
+    <label>Caminas desde ahí (minutos)</label>
+    <input id="bjPasos" type="number" min="0" placeholder="ej: 8">
+    <label>Consejo / por qué elegir esta</label>
+    <textarea id="bjConsejo" rows="2" placeholder="ej: más seguro de noche…"></textarea>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarBajadaEd()">Guardar</button>
+      <button class="btn ghost" onclick="cerrarEditorBajada()" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet precio frecuente -->
+<div class="mask" id="frecMask" onclick="cerrarFrecuente(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <h3>Precio frecuente</h3>
+    <div class="hint">Ej: "UTP $0,35", "Dolega → Terminal $0,60". Aparece como botón rápido en Gastos.</div>
+    <label>Nombre</label>
+    <input id="frNombre" placeholder="ej: Dolega → Terminal">
+    <label>Precio ($)</label>
+    <input id="frPrecio" type="number" step="0.05" min="0" placeholder="ej: 0.60">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn" onclick="guardarFrecuente()">Guardar</button>
+      <button class="btn ghost" onclick="cerrarFrecuente()" style="flex:0 0 auto">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modo solo hora -->
+<div class="modo-hora" id="modoHora" onclick="cerrarModoHora()">
+  <button class="mh-close" onclick="event.stopPropagation();cerrarModoHora()" title="Salir">✕</button>
+  <div class="grande" id="mhHora">--:--</div>
+  <div class="seg" id="mhSeg"></div>
+  <div class="sub" id="mhFecha"></div>
+  <div class="prox-bus" id="mhProx">Próximo bus: --</div>
+  <div class="salir-hint">Toca en cualquier lugar para salir</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'miruta_v9';
+const DIAS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+const EMPRESAS_COL = {
+  'UTP':'#3A8FFF','Lassonde':'#C77DFF','Nuevo Amanecer':'#FFB340','Dolega':'#4DC9F6',
+  'Boquete':'#4ADE80','Potrerillos':'#FF6B8A','Palmira':'#FACC15','Tinajas':'#D4A574',
+  'Las Cañas':'#A78BFA','Bugaba':'#FB7185','La Frontera':'#FDBA74','Otra':'#94A3B8','':'#94A3B8'
+};
+
+const EJEMPLOS = [
+  // Casa (5 min a la parada) → Terminal. Buses $0.60. Primer bus 05:00, último ~22:15.
+  { id:'r_dol', tipo:'bus', empresa:'Dolega', nombre:'Dolega → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:00','22:15',15), cada:15, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_boq', tipo:'bus', empresa:'Boquete', nombre:'Boquete → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:10','20:40',30), cada:30, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_pot', tipo:'bus', empresa:'Potrerillos', nombre:'Potrerillos → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:20','20:20',45), cada:45, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_pal', tipo:'bus', empresa:'Palmira', nombre:'Palmira → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:30','20:30',60), cada:60, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_tin', tipo:'bus', empresa:'Tinajas', nombre:'Tinajas → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:35','20:35',60), cada:60, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_can', tipo:'bus', empresa:'Las Cañas', nombre:'Las Cañas → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:40','20:40',60), cada:60, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_dos', tipo:'bus', empresa:'Dos Ríos', nombre:'Dos Ríos → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:15','20:15',30), cada:30, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_val', tipo:'bus', empresa:'El Valle', nombre:'El Valle → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:25','20:25',30), cada:30, duracion:35, caminar:5, precio:0.60, aprox:true },
+  { id:'r_alg', tipo:'bus', empresa:'Los Algarrobos', nombre:'Los Algarrobos → Terminal (vía La Parada)', origen:'Dolega', destino:'Terminal', horarios:expandirHorarios('05:30','20:30',30), cada:30, duracion:35, caminar:5, precio:0.60, aprox:true },
+  // Caminatas desde la Terminal
+  { id:'r_pie_hotel', tipo:'pie', empresa:'', nombre:'Terminal → Parada del Hotel', origen:'Terminal', destino:'Parada del Hotel', horarios:[], duracion:5, caminar:0, precio:null },
+  { id:'r_pie_opt', tipo:'pie', empresa:'', nombre:'Terminal → Óptica', origen:'Terminal', destino:'Óptica', horarios:[], duracion:2, caminar:0, precio:null },
+  // De la parada del Hotel/Farmacia directo a la UTP
+  { id:'r_als', tipo:'bus', empresa:'Lassonde', nombre:'Parada del Hotel → UTP', origen:'Parada del Hotel', destino:'UTP', horarios:expandirHorarios('05:00','21:30',30), cada:30, duracion:18, caminar:0, precio:0.35, aprox:true },
+  { id:'r_nam', tipo:'bus', empresa:'Nuevo Amanecer', nombre:'Parada del Hotel → UTP', origen:'Parada del Hotel', destino:'UTP', horarios:expandirHorarios('05:15','21:35',20), cada:20, duracion:18, caminar:0, precio:0.35, aprox:true },
+  // Desde la Óptica: buses Bugaba cada 15 min, te dejan en La Bomba
+  { id:'r_bug', tipo:'bus', empresa:'Bugaba', nombre:'Hacia Bugaba / La Frontera (baja en La Bomba)', origen:'Óptica', destino:'La Bomba', horarios:expandirHorarios('05:15','20:45',15), cada:15, duracion:15, caminar:0, precio:0.35, aprox:true },
+  { id:'r_pie_bomba', tipo:'pie', empresa:'', nombre:'La Bomba → UTP (caminando)', origen:'La Bomba', destino:'UTP', horarios:[], duracion:9, caminar:0, precio:null },
+  // Taxi $1 a la Óptica o Farmacia (pasan por la Terminal)
+  { id:'r_taxi_opt', tipo:'taxi', empresa:'', nombre:'Taxi La Parada → Óptica/Farmacia', origen:'Dolega', destino:'Óptica', horarios:[], duracion:8, caminar:0, precio:1.00 },
+  // Uber/inDriver $3-5 de la Terminal a la UTP
+  { id:'r_taxi_utp', tipo:'taxi', empresa:'', nombre:'Uber/inDriver Terminal → UTP', origen:'Terminal', destino:'UTP', horarios:[], duracion:12, caminar:0, precio:3.00 }
+];
+const EJEMPLOS_BAJADAS = [
+  { id:'b1', lugar:'Entrada Nueva', ruta:'UTP', pasos:8, consejo:'Más rápido si vas con prisa.' },
+  { id:'b2', lugar:'Frasasi', ruta:'UTP', pasos:14, consejo:'Más pasos y más seguro de noche.' },
+  { id:'b3', lugar:'Parque Central', ruta:'Lassonde', pasos:6, consejo:'Bajada corta; pasas por la panadería.' }
+];
+const EJEMPLOS_FREC = [
+  { id:'f1', nombre:'🚌 UTP', precio:0.35 },
+  { id:'f2', nombre:'🚌 Dolega → Terminal', precio:0.60 },
+  { id:'f3', nombre:'🚌 Bugaba', precio:0.35 },
+  { id:'f4', nombre:'🚕 Taxi → Óptica', precio:1.00 },
+  { id:'f5', nombre:'📱 Uber Terminal → UTP', precio:3.00 },
+  { id:'f6', nombre:'🚗 inDriver Terminal → UTP', precio:5.00 }
+];
+const APPS_DEF = [
+  { nombre:'Taxi La Parada→Terminal', icono:'🚕', costo:1.00 },
+  { nombre:'Taxi/Uber Terminal→UTP', icono:'🚕', costo:3.00 },
+  { nombre:'inDriver Terminal→UTP', icono:'🚗', costo:3.00 }
+];
+
+let estado = { rutas:[], bajadas:[], gastos:[], notas:[], viajes:[], caminatas:[], frecuentes:[], presupuesto:null, tema:'oscuro', acento:'azul', bajadaFav:null, salida:'Dolega', apps:[], ahorro:{ meta:0, registros:[] }, dinero:{ dia:'', monto:0 }, clases:[] };
+let filtro = 'todos';
+let secActual = 'inicio';
+let editandoId = null;
+let editandoBjId = null;
+
+/* ---------- Persistencia ---------- */
+function cargar(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ estado = Object.assign(estado, JSON.parse(raw)); }
+  }catch(e){}
+  ['rutas','bajadas','gastos','notas','viajes','caminatas','frecuentes'].forEach(k=>{ if(!Array.isArray(estado[k])) estado[k] = []; });
+  if(!estado.salida) estado.salida = 'Dolega';
+  if(!Array.isArray(estado.apps) || !estado.apps.length) estado.apps = APPS_DEF.map(a=>({...a}));
+  if(!estado.ahorro) estado.ahorro = { meta:0, registros:[] };
+  if(!Array.isArray(estado.ahorro.registros)) estado.ahorro.registros = [];
+  if(!estado.dinero) estado.dinero = { dia:'', monto:0 };
+  if(!Array.isArray(estado.clases)) estado.clases = [];
+  // cargar horario UTP si no tiene (o si tenía vacío de versiones anteriores)
+  if(!estado.clases.length){
+    estado.clases = [
+      // Ciberseguridad (Lun-Vie) 12:00-18:35
+      { id:'c_embe_lun', nombre:'Sist. Embebidos', dia:1, hora:'12:50' },
+      { id:'c_embeb_lun', nombre:'Embebidos Lab', dia:1, hora:'13:40' },
+      { id:'c_cib_lun', nombre:'Ciberseguridad', dia:1, hora:'15:20' },
+      { id:'c_web_lun', nombre:'Desarrollo Web', dia:1, hora:'16:10' },
+      { id:'c_estad_mar', nombre:'Estadística', dia:2, hora:'12:00' },
+      { id:'c_estadlab_mar', nombre:'Estadística Lab', dia:2, hora:'12:50' },
+      { id:'c_cib_mar', nombre:'Ciberseguridad Lab', dia:2, hora:'14:30' },
+      { id:'c_cript_mar', nombre:'Criptografía', dia:2, hora:'16:10' },
+      { id:'c_embe_mie', nombre:'Sist. Embebidos', dia:3, hora:'14:30' },
+      { id:'c_cript_mie', nombre:'Criptografía Lab', dia:3, hora:'16:10' },
+      { id:'c_estad_jue', nombre:'Estadística', dia:4, hora:'12:50' },
+      { id:'c_cib_jue', nombre:'Ciberseguridad Lab', dia:4, hora:'14:30' },
+      { id:'c_web_jue', nombre:'Desarrollo Web Lab', dia:4, hora:'16:10' },
+      { id:'c_embe_vie', nombre:'Sist. Embebidos', dia:5, hora:'14:30' },
+      { id:'c_web_vie', nombre:'Desarrollo Web', dia:5, hora:'16:10' },
+      // Criminalística (UANCHI) - solo Miércoles y Jueves
+      { id:'c_i406_mie', nombre:'ICS 406 (UANCHI)', dia:3, hora:'17:10' },
+      { id:'c_med401_mie', nombre:'MED 401 (UANCHI)', dia:3, hora:'18:50' },
+      { id:'c_der401_mie', nombre:'DER 401 (UANCHI)', dia:3, hora:'20:30' },
+      { id:'c_i402b_jue', nombre:'ICS 402B (UANCHI)', dia:4, hora:'18:50' },
+      { id:'c_i405_jue', nombre:'ICS 405 (UANCHI)', dia:4, hora:'20:30' }
+    ];
+    estado.clases.sort((a,b)=> a.dia - b.dia || a.hora.localeCompare(b.hora));
+  }
+  // migrar versiones anteriores
+  if(!estado.rutas.length){
+    for(const k of ['miruta_v7','miruta_v6','miruta_v5','miruta_v4','miruta_v3','miruta_v2']){
+      try{
+        const old = JSON.parse(localStorage.getItem(k) || 'null');
+        if(old && old.rutas && old.rutas.length){
+          estado.rutas = old.rutas;
+          estado.bajadas = old.bajadas || [];
+          estado.gastos = old.gastos || [];
+          estado.notas = old.notas || [];
+          estado.viajes = old.viajes || [];
+          estado.caminatas = old.caminatas || [];
+          estado.tema = old.tema || 'oscuro';
+          estado.bajadaFav = old.bajadaFav || null;
+          estado.presupuesto = old.presupuesto || null;
+          estado.salida = old.salida || 'Dolega';
+          estado.apps = old.apps || [];
+          estado.ahorro = old.ahorro || { meta:0, registros:[] };
+          break;
+        }
+      }catch(e){}
+    }
+  }
+  // si sus rutas son exactamente los ejemplos viejos, reemplazar por la red real
+  const ids = estado.rutas.map(r=>r.id).sort().join(',');
+  const viejosA = ['r1','r2','r3','r4','r5','r6'].sort().join(',');
+  const viejosB = ['r_dol','r_boq','r_pot','r_pal','r_tin','r_can','r_als','r_nam','r_bug','r_pie_bomba','r_taxi_par','r_pie_opt'].sort().join(',');
+  if(ids === viejosA || ids === viejosB){
+    estado.rutas = EJEMPLOS.map(r=>({...r, horarios: (r.horarios||[]).slice()}));
+  }
+  // si está vacío (instalación nueva), cargar la red de ejemplo
+  if(!estado.rutas.length){
+    estado.rutas = EJEMPLOS.map(r=>({...r, horarios: (r.horarios||[]).slice()}));
+  }
+  // migración ligera: actualizar datos viejos sin borrar lo que ella editó
+  estado.rutas.forEach(r=>{
+    if(r.id === 'r_bug' && r.precio > 0.36) r.precio = 0.35;
+    if(['r_dol','r_boq','r_pot','r_pal','r_tin','r_can','r_dos','r_val','r_alg'].includes(r.id) && r.caminar > 5) r.caminar = 5;
+  });
+  // asegurar taxi Óptica y Uber Terminal→UTP si faltan
+  const idsAct = new Set(estado.rutas.map(r=>r.id));
+  if(!idsAct.has('r_taxi_opt')){
+    const t = EJEMPLOS.find(r=>r.id==='r_taxi_opt');
+    if(t) estado.rutas.push({...t});
+  }
+  if(!idsAct.has('r_taxi_utp')){
+    const t = EJEMPLOS.find(r=>r.id==='r_taxi_utp');
+    if(t) estado.rutas.push({...t});
+  }
+  // agregar nuevas rutas de bus si faltan
+  ['r_dos','r_val','r_alg'].forEach(id=>{
+    if(!idsAct.has(id)){
+      const t = EJEMPLOS.find(r=>r.id===id);
+      if(t) estado.rutas.push({...t, horarios: (t.horarios||[]).slice()});
+    }
+  });
+  // completar origen/destino desde el nombre ("A → B") y auto-nombre
+  estado.rutas.forEach(r=>{
+    if(r.origen == null || r.destino == null){
+      const partes = String(r.nombre||'').split('→');
+      r.origen = (r.origen != null) ? r.origen : (partes[0]||'').trim();
+      r.destino = (r.destino != null) ? r.destino : (partes[1]||'').trim();
+    }
+    if(!r.nombre && r.origen && r.destino) r.nombre = r.origen+' → '+r.destino;
+    // frecuencia aproximada automática si no está guardada
+    if(r.tipo === 'bus' && !r.cada && r.horarios && r.horarios.length >= 3){
+      const ts = r.horarios.map(aMin).sort((a,b)=>a-b);
+      const diffs = [];
+      for(let i=1;i<ts.length;i++){ const d = ts[i]-ts[i-1]; if(d > 0 && d <= 120) diffs.push(d); }
+      if(diffs.length){
+        diffs.sort((a,b)=>a-b);
+        r.cada = diffs[Math.floor(diffs.length/2)];
+      }
+    }
+  });
+  if(!estado.rutas.length){ estado.rutas = EJEMPLOS.map(r=>({...r})); }
+  if(!estado.bajadas.length){ estado.bajadas = EJEMPLOS_BAJADAS.map(b=>({...b})); estado.bajadaFav = 'b1'; }
+  if(!estado.frecuentes.length){ estado.frecuentes = EJEMPLOS_FREC.map(f=>({...f})); }
+  guardar();
+}
+function guardar(){ invalidarCache(); _opsCache.clear(); try{ localStorage.setItem(KEY, JSON.stringify(estado)); }catch(e){} }
+
+/* ---------- Tema ---------- */
+function aplicarTema(){
+  document.documentElement.setAttribute('data-tema', estado.tema === 'claro' ? 'claro' : 'oscuro');
+  document.getElementById('btnTema').textContent = estado.tema === 'claro' ? '☀️' : '🌙';
+  if(estado.acento){
+    const t = TEMAS_ACCENTO.find(x=>x.id===estado.acento);
+    if(t){
+      document.documentElement.style.setProperty('--blue', t.col);
+      document.documentElement.style.setProperty('--blue2', t.col2);
+    }
+  }
+}
+function setTema(t){ estado.tema = t; aplicarTema(); guardar(); toast(t==='claro' ? 'Modo claro ☀️' : 'Modo oscuro 🌙'); }
+function toggleTema(){ setTema(estado.tema === 'claro' ? 'oscuro' : 'claro'); }
+
+/* ---------- Color de acento ---------- */
+const TEMAS_ACCENTO = [
+  { id:'azul', nombre:'Azul', col:'#0A84FF', col2:'#5AC8FA' },
+  { id:'verde', nombre:'Verde', col:'#30D158', col2:'#64E08A' },
+  { id:'rosa', nombre:'Rosa', col:'#FF2D92', col2:'#FF6BB5' },
+  { id:'morado', nombre:'Morado', col:'#BF5AF2', col2:'#DA8FFF' },
+  { id:'naranja', nombre:'Naranja', col:'#FF9F0A', col2:'#FFB84D' },
+  { id:'rojo', nombre:'Rojo', col:'#FF453A', col2:'#FF6B63' },
+  { id:'turquesa', nombre:'Turquesa', col:'#64D2FF', col2:'#8FE0FF' },
+  { id:'dorado', nombre:'Dorado', col:'#FFD60A', col2:'#FFE44D' }
+];
+function setAccento(id){
+  const t = TEMAS_ACCENTO.find(x=>x.id===id) || TEMAS_ACCENTO[0];
+  estado.acento = t.id;
+  document.documentElement.style.setProperty('--blue', t.col);
+  document.documentElement.style.setProperty('--blue2', t.col2);
+  guardar(); pintarTemas(); toast('Color: '+t.nombre+' 🎨');
+}
+function pintarTemas(){
+  const el = document.getElementById('temasEdit');
+  if(!el) return;
+  const actual = estado.acento || 'azul';
+  el.innerHTML = TEMAS_ACCENTO.map(t=>
+    '<button onclick="setAccento(\''+t.id+'\')" style="flex:1;min-width:70px;padding:10px 6px;border-radius:10px;border:2px solid '+(t.id===actual?t.col:'transparent')+';background:'+t.col+'22;color:var(--txt);font-size:12px;font-weight:700;cursor:pointer">'+
+      '<div style="width:20px;height:20px;border-radius:50%;background:'+t.col+';margin:0 auto 4px"></div>'+
+      t.nombre+
+    '</button>'
+  ).join('');
+}
+
+/* ---------- Exportar / Importar ---------- */
+function exportarDatos(){
+  const datos = JSON.stringify(estado, null, 2);
+  const blob = new Blob([datos], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'miruta_'+hoyFecha()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Datos descargados 📥');
+}
+function importarDatos(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const datos = JSON.parse(e.target.result);
+      if(datos && datos.rutas){
+        estado = Object.assign(estado, datos);
+        if(!estado.ahorro) estado.ahorro = { meta:0, registros:[] };
+        if(!estado.dinero) estado.dinero = { dia:'', monto:0 };
+        if(!Array.isArray(estado.clases)) estado.clases = [];
+        guardar(); aplicarTema();
+        if(estado.acento) setAccento(estado.acento);
+        pintarTodo();
+        toast('Datos importados 📤');
+      } else {
+        toast('Archivo no válido ❌');
+      }
+    }catch(err){
+      toast('Error al leer el archivo ❌');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+/* ---------- Navegación ---------- */
+function irSec(nombre, btn){
+  secActual = nombre;
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sec-'+nombre).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  (btn || document.querySelector('.nav-btn[data-sec="'+nombre+'"]')).classList.add('on');
+  document.getElementById('fabViaje').classList.toggle('show', nombre==='inicio' || nombre==='bitacora');
+  const subes = { inicio:'¿A qué hora sale mi bus?', uni:'Tus clases y cuándo salir', bitacora:'Tu registro de viajes', gastos:'Tu economía de transporte', bajadas:'Tus bajadas y caminatas', notas:'Lo que quieras anotar', ajustes:'Configura MiRuta' };
+  document.getElementById('subTitulo').textContent = subes[nombre] || '';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------- Tiempo ---------- */
+function aMin(hhmm){ const [h,m] = hhmm.split(':').map(Number); return h*60+m; }
+function fmtHora(minTotal){
+  minTotal = ((minTotal % 1440) + 1440) % 1440;
+  const h = Math.floor(minTotal/60), m = Math.floor(minTotal%60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function ahoraMin(){
+  const d = new Date();
+  return d.getHours()*60 + d.getMinutes() + d.getSeconds()/60;
+}
+function hoyFecha(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fechaDe(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function proximaSalida(ruta, desdeMin){
+  if(ruta.tipo !== 'bus' || !ruta.horarios || !ruta.horarios.length) return null;
+  const ah = (desdeMin != null) ? desdeMin : ahoraMin();
+  let mejor = null;
+  ruta.horarios.forEach(hh=>{
+    let t = aMin(hh);
+    let delta = t - ah;
+    if(delta < -0.5) delta += 1440;
+    if(mejor === null || delta < mejor.enMin) mejor = { enMin: delta, hora: hh, t: t };
+  });
+  return mejor;
+}
+function proxBusGlobal(){
+  let mejor = null;
+  estado.rutas.filter(r=>r.tipo==='bus').forEach(r=>{
+    const p = proximaSalida(r);
+    if(p && (!mejor || p.enMin < mejor.p.enMin)) mejor = { r, p };
+  });
+  return mejor;
+}
+function fmtNum(n){ return Number(n).toFixed(2).replace('.',','); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function icono(t){ return t==='bus' ? '🚌' : t==='taxi' ? '🚕' : t==='uber' ? '📱' : t==='indriver' ? '🚗' : '🚶'; }
+function nombreTipo(t){ return t==='bus' ? 'Bus' : t==='taxi' ? 'Taxi' : t==='uber' ? 'Uber' : t==='indriver' ? 'inDriver' : 'A pie'; }
+function zona(){ return estado.salida || 'mi casa'; }
+function fmtCuenta(min){
+  if(min >= 60){ const h = Math.floor(min/60), m = min%60; return h+'h '+String(m).padStart(2,'0'); }
+  return String(min).padStart(min >= 10 ? 1 : 2, '0');
+}
+function colorEmpresa(e){ return EMPRESAS_COL[e] || EMPRESAS_COL['Otra']; }
+function expandirHorarios(desde, hasta, cada){
+  if(!desde || !hasta || !cada || cada <= 0) return [];
+  let ini = aMin(desde), fin = aMin(hasta);
+  if(fin < ini) fin += 1440;
+  const lista = [];
+  for(let t = ini; t <= fin; t += cada){ lista.push(fmtHora(t)); }
+  if(lista.length > 80) return [];
+  return lista;
+}
+
+/* ---------- Presupuesto ---------- */
+function gastoPeriodo(periodo){
+  if(periodo === 'mes'){
+    const d = new Date();
+    const ini = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+    return estado.gastos.filter(g=>g.fecha >= ini).reduce((a,g)=>a+(Number(g.monto)||0),0);
+  }
+  return totalSemana();
+}
+function calcPresupuesto(gastado, monto){
+  const pct = monto > 0 ? Math.round(gastado/monto*100) : 0;
+  const quedan = Math.round((monto - gastado)*100)/100;
+  const nivel = pct >= 100 ? 'over' : pct >= 85 ? 'warn' : 'ok';
+  return { pct, quedan, nivel };
+}
+function pintarPresupuesto(){
+  const cont = document.getElementById('presuContenido');
+  if(!cont) return;
+  if(!estado.presupuesto || !estado.presupuesto.monto){
+    cont.innerHTML = '<div style="font-size:12.5px;color:var(--muted);font-weight:700;line-height:1.5;margin-bottom:8px">Sin presupuesto aún. Fíjate cuánto puedes gastar en transporte por semana o mes.</div>'+
+      '<button class="btn ghost small" style="width:100%" onclick="irSec(\'ajustes\')">Configurar presupuesto</button>';
+    return;
+  }
+  const m = estado.presupuesto.monto;
+  const periodo = estado.presupuesto.periodo === 'mes' ? 'mes' : 'semana';
+  const gastado = gastoPeriodo(periodo);
+  const c = calcPresupuesto(gastado, m);
+  const label = periodo === 'mes' ? 'este mes' : 'esta semana';
+  const txt = c.nivel === 'over'
+    ? 'Te pasaste $'+fmtNum(Math.abs(c.quedan))+' '+label+' 😅'
+    : 'Quedan $'+fmtNum(Math.max(0, c.quedan))+' '+label;
+  cont.innerHTML =
+    '<div class="presu-bar"><div class="presu-fill '+c.nivel+'" id="presuFill"></div></div>'+
+    '<div class="presu-txt"><span>$'+fmtNum(gastado)+' de $'+fmtNum(m)+'</span><span class="q">'+txt+'</span></div>'+
+    '<div style="font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px">'+Math.min(999,c.pct)+'% usado · '+(periodo==='mes'?'mensual':'semanal')+'</div>'+
+    hoyLinea(c, periodo);
+  requestAnimationFrame(()=>{ const f = document.getElementById('presuFill'); if(f) f.style.width = Math.min(100, c.pct)+'%'; });
+}
+function diasRestantesPeriodo(periodo){
+  const d = new Date();
+  if(periodo === 'mes'){
+    const fin = new Date(d.getFullYear(), d.getMonth()+1, 0);
+    return Math.max(1, fin.getDate() - d.getDate() + 1);
+  }
+  const dow = d.getDay();
+  return Math.max(1, dow === 0 ? 1 : 8 - dow);
+}
+function hoyLinea(c, periodo){
+  if(c.nivel === 'over'){
+    return '<div style="font-size:12px;font-weight:800;color:var(--danger);margin-top:4px">🔴 Hoy no te queda: ya te pasaste de tu presupuesto</div>';
+  }
+  const dias = diasRestantesPeriodo(periodo);
+  const alDia = Math.floor(c.quedan / dias * 100) / 100;
+  return '<div style="font-size:12.5px;font-weight:800;color:var(--ok);margin-top:4px">💚 Hoy te toca hasta <b>$'+fmtNum(alDia)+'</b> · quedan '+dias+' día'+(dias>1?'s':'')+' del '+(periodo==='mes'?'mes':'semana')+'</div>';
+}
+function guardarZona(){
+  const v = document.getElementById('zSalida').value.trim();
+  if(!v){ toast('Pon tu zona, ej: Dolega 📍'); return; }
+  estado.salida = v;
+  guardar();
+  pintarHero(); pintarPlan();
+  toast('Zona: '+v+' 📍');
+}
+function pintarApps(){
+  const cont = document.getElementById('appsEdit');
+  if(!cont) return;
+  cont.innerHTML = (estado.apps||[]).map((a,i)=>
+    '<div class="app-row"><span class="app-ico">'+a.icono+'</span><span class="app-nombre">'+esc(a.nombre)+'</span>'+
+    '<span style="font-size:12px;font-weight:800;color:var(--muted)">$</span>'+
+    '<input type="number" step="0.25" min="0" value="'+(a.costo == null ? '' : a.costo)+'" onchange="setAppCosto('+i+', this.value)"></div>'
+  ).join('');
+}
+function setAppCosto(i, v){
+  const n = parseFloat(v);
+  estado.apps[i].costo = isNaN(n) ? null : n;
+  guardar(); pintarPlan();
+  toast('Precio de '+estado.apps[i].nombre+' actualizado');
+}
+
+/* ---------- Ahorro ---------- */
+function totalAhorroMes(){
+  const d = new Date();
+  const ini = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+  return (estado.ahorro.registros||[]).filter(r=>r.fecha >= ini).reduce((a,r)=>a+(Number(r.monto)||0),0);
+}
+function pintarAhorro(){
+  const cont = document.getElementById('ahorroContenido');
+  if(!cont) return;
+  const meta = Number(estado.ahorro.meta)||0;
+  const total = totalAhorroMes();
+  const pct = meta > 0 ? Math.min(100, Math.round(total/meta*100)) : 0;
+  const regs = (estado.ahorro.registros||[]).slice(0,5);
+  cont.innerHTML =
+    '<div class="presu-bar"><div class="presu-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="presu-txt"><span>$'+fmtNum(total)+' este mes</span><span class="q">meta $'+fmtNum(meta||0)+'</span></div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+      '<input type="number" id="ahMonto" step="0.05" min="0" placeholder="Monto $">'+
+      '<input type="text" id="ahNota" placeholder="Nota (ej: caminé)" style="flex:1;min-width:0">'+
+      '<button class="btn" style="flex:0 0 auto;padding:10px 12px" onclick="guardarAhorro()">＋</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px;align-items:center">'+
+      '<input type="number" id="ahMeta" step="0.50" min="0" placeholder="Meta del mes $" value="'+(meta||'')+'" style="flex:1">'+
+      '<button class="btn ghost" style="flex:0 0 auto" onclick="guardarMetaAhorro()">Meta 🎯</button>'+
+    '</div>'+
+    (regs.length
+      ? '<div class="section-title" style="margin:14px 0 4px">Últimos ahorros</div>'+regs.map(r=>
+          '<div class="app-row"><span class="app-ico">🐷</span><span class="app-nombre">'+esc(r.nota||'Ahorro')+
+          '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+r.fecha+'</div></span>'+
+          '<span style="font-weight:850;font-size:13px" class="ahorro-ok">+$'+fmtNum(r.monto)+'</span></div>').join('')
+      : '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;line-height:1.5">Sin ahorros registrados. Ej: caminaste en vez de tomar el bus, o te sobrió del pasaje.</div>');
+}
+function guardarAhorro(){
+  const monto = parseFloat(document.getElementById('ahMonto').value);
+  if(isNaN(monto) || monto <= 0){ toast('Pon un monto válido 🐷'); return; }
+  estado.ahorro.registros.unshift({
+    id:'a'+Date.now(), fecha: hoyFecha(), monto,
+    nota: document.getElementById('ahNota').value.trim()
+  });
+  guardar(); pintarAhorro();
+  toast('¡Ahorraste $'+fmtNum(monto)+'! 🐷');
+}
+function guardarMetaAhorro(){
+  const monto = parseFloat(document.getElementById('ahMeta').value);
+  estado.ahorro.meta = (isNaN(monto) || monto < 0) ? 0 : monto;
+  guardar(); pintarAhorro();
+  toast('Meta: $'+fmtNum(estado.ahorro.meta)+' al mes 🎯');
+}
+function guardarPresupuesto(){
+  const monto = parseFloat(document.getElementById('prMonto').value);
+  const periodo = document.getElementById('prPeriodo').value === 'mes' ? 'mes' : 'semana';
+  if(isNaN(monto) || monto <= 0){ toast('Pon un monto válido 💰'); return; }
+  estado.presupuesto = { monto, periodo };
+  guardar();
+  pintarPresupuesto();
+  toast('Presupuesto: $'+fmtNum(monto)+' '+(periodo==='mes'?'al mes':'a la semana')+' 💰');
+}
+function quitarPresupuesto(){
+  estado.presupuesto = null;
+  guardar();
+  document.getElementById('prMonto').value = '';
+  pintarPresupuesto();
+  toast('Presupuesto quitado');
+}
+
+/* ---------- Hero ---------- */
+function setFiltro(f, btn){
+  filtro = f;
+  document.querySelectorAll('#tabs .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  pintarRutas();
+}
+function pintarHero(){
+  const cuentaEl = document.getElementById('heroCuenta');
+  const rutaEl = document.getElementById('heroRuta');
+  const saleEl = document.getElementById('heroSale');
+  const chipEl = document.getElementById('heroChip');
+  const empEl = document.getElementById('heroEmpresa');
+  const oriEl = document.getElementById('heroOrigen');
+  if(oriEl) oriEl.textContent = 'Desde ' + zona();
+  const ahora = new Date();
+  const minsAhora = ahora.getHours()*60 + ahora.getMinutes();
+
+  // 1) Clase próxima (hoy o mañana): encontrar el ÚLTIMO viaje que llega antes de la clase
+  const prox = proximaClase();
+  if(prox && prox.offset <= 1){
+    const tClase = aMin(prox.clase.hora);
+    rutaEl.innerHTML = '📚 '+esc(prox.clase.nombre)+' · '+prox.clase.hora;
+    empEl.innerHTML = '';
+    chipEl.textContent = prox.offset===0 ? 'hoy' : 'mañana';
+    // buscar viajes: escanear cada 15 min (no 5) para ser más rápido
+    let mejor = null;
+    for(let t = Math.max(0, tClase - 240); t <= tClase - 15; t += 15){
+      const ops = opcionesDeViaje('UTP', t);
+      for(let j=0; j<ops.length; j++){
+        const o = ops[j];
+        if(o.llegada <= tClase && o.minutos > 0){
+          if(!mejor || o.llegada > mejor.llegada || (o.llegada === mejor.llegada && o.costo < mejor.costo)){
+            mejor = o;
+          }
+        }
+      }
+    }
+    if(mejor){
+      // el viaje empezó en mejor.llegada - mejor.minutos = cuando saliste de casa
+      const salidaCasa = Math.max(0, Math.round(mejor.llegada - mejor.minutos));
+      const enClase = (prox.offset*1440 + tClase) - minsAhora;
+      const h = Math.floor(Math.max(0,enClase)/60), m = Math.round(Math.max(0,enClase)%60);
+      cuentaEl.innerHTML = enClase > 0
+        ? (h>0 ? h+'<small>h </small>' : '')+String(m).padStart(2,'0')+'<small>m para clase</small>'
+        : '<small>¡ya empezó!</small>';
+      saleEl.textContent = '🚗 Sal de casa a las '+fmtHora(salidaCasa)+' · llegas UTP '+fmtHora(mejor.llegada)+' · $'+fmtNum(mejor.costo);
+    } else {
+      cuentaEl.innerHTML = prox.clase.hora;
+      saleEl.textContent = 'No encontré bus antes de la clase 😕';
+    }
+    return;
+  }
+
+  // 2) Sin clase pronto: próximo viaje a la UTP
+  const opsUtp = opcionesDeViaje('UTP', ahoraMin());
+  if(opsUtp.length){
+    const mejor = opsUtp[0];
+    const primerTramo = mejor.legs[0];
+    const col = colorEmpresa(primerTramo.r.empresa);
+    rutaEl.innerHTML = icono(primerTramo.r.tipo)+' '+esc(primerTramo.r.nombre);
+    empEl.innerHTML = primerTramo.r.empresa
+      ? '<span class="empresa-chip" style="background:'+col+'28;color:'+col+'">'+esc(primerTramo.r.empresa)+'</span>'
+      : '';
+    const minsViaje = Math.round(mejor.minutos);
+    const h = Math.floor(minsViaje/60), m = minsViaje%60;
+    cuentaEl.innerHTML = (h>0 ? h+'<small>h </small>' : '')+String(m).padStart(2,'0')+'<small>m a la UTP</small>';
+    chipEl.textContent = '$'+fmtNum(mejor.costo);
+    saleEl.textContent = 'Llegas UTP a las '+fmtHora(mejor.llegada)+
+      (mejor.legs.length>1 ? ' · '+mejor.legs.length+' tramos' : ' · directo');
+    return;
+  }
+
+  // 3) Fallback: próximo bus cualquiera
+  const mejorBus = proxBusGlobal();
+  if(!mejorBus){
+    rutaEl.textContent = 'Sin horarios de bus';
+    empEl.innerHTML = '';
+    cuentaEl.innerHTML = '--<small>:--</small>';
+    saleEl.textContent = 'Agrega tus buses en ⚙️ Ajustes';
+    chipEl.textContent = '--:--';
+    return;
+  }
+  const { r, p } = mejorBus;
+  rutaEl.innerHTML = icono(r.tipo)+' '+esc(r.nombre);
+  const col2 = colorEmpresa(r.empresa);
+  empEl.innerHTML = r.empresa
+    ? '<span class="empresa-chip" style="background:'+col2+'28;color:'+col2+'">'+esc(r.empresa)+'</span>'
+    : '';
+  chipEl.textContent = 'sale '+p.hora;
+  const min = Math.max(0, Math.round(p.enMin));
+  if(min > 120){
+    cuentaEl.innerHTML = '<small>próximo a las </small>'+p.hora;
+    saleEl.textContent = min > 240 ? 'Mañana empiezan los buses a las '+p.hora : 'Sale a las '+p.hora;
+  } else {
+    const cam = r.caminar || 0;
+    const hh = Math.floor(min/60), mm = min%60, ss = Math.floor((p.enMin*60)%60);
+    cuentaEl.innerHTML = hh > 0
+      ? hh+'<small>h </small>'+String(mm).padStart(2,'0')+'<small>m </small>'+String(ss).padStart(2,'0')+'<small>s</small>'
+      : String(mm).padStart(2,'0')+'<small>:</small>'+String(ss).padStart(2,'0');
+    if(cam && min - cam <= 0){
+      saleEl.textContent = '🚨 ¡Ya sal! Camina '+cam+' min a la parada';
+    } else if(cam && min - cam <= 20){
+      saleEl.textContent = 'Sale a las '+p.hora+' · sal de casa en '+(min - cam)+' min';
+    } else {
+      saleEl.textContent = 'Sale a las '+p.hora;
+    }
+  }
+}
+function pintarAviso(){
+  const el = document.getElementById('avisoSalida');
+  const mejor = proxBusGlobal();
+  el.className = 'aviso-salida';
+  if(!mejor) return;
+  const { r, p } = mejor;
+  const min = Math.round(p.enMin);
+  const cam = r.caminar || 0;
+  if(min - cam <= 1){
+    el.classList.add('show','sale-ya');
+    el.innerHTML = '🚨 ¡Ya sal! Tu '+esc(r.nombre.split('·')[0].trim())+' sale a las '+p.hora;
+  } else if(min - cam <= 10){
+    el.classList.add('show','sale-pronto');
+    el.innerHTML = '⏰ Prepárate: sal de casa en '+(min - cam)+' min';
+  }
+}
+
+/* ---------- Planificador de viajes (con transbordo) ---------- */
+function normLugar(s){
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+function lugaresIguales(a,b){
+  const na = normLugar(a), nb = normLugar(b);
+  if(!na || !nb) return false;
+  return na === nb || na.includes(nb) || nb.includes(na);
+}
+// caché de items para no recalcular en cada llamada
+let _itemsCache = null, _itemsCacheLen = -1;
+function itemsDeViaje(){
+  if(_itemsCache && _itemsCacheLen === estado.rutas.length) return _itemsCache;
+  _itemsCache = estado.rutas.filter(r=>{
+    if(!r.origen || !r.destino) return false;
+    if(r.tipo === 'bus') return !!(r.horarios||[]).length;
+    return r.tipo === 'taxi' || r.tipo === 'pie';
+  });
+  _itemsCacheLen = estado.rutas.length;
+  return _itemsCache;
+}
+function invalidarCache(){ _itemsCache = null; _itemsCacheLen = -1; }
+function destinosConocidos(){
+  const set = new Set();
+  itemsDeViaje().forEach(r=>{ if(r.destino) set.add(r.destino.trim()); });
+  return Array.from(set).sort((a,b)=> (normLugar(a)==='utp' ? -1 : normLugar(b)==='utp' ? 1 : 0));
+}
+const TRANSB_MIN = { bus:7, taxi:5, pie:0 };
+function salidaDesde(r, t){
+  if(r.tipo === 'bus'){
+    const p = proximaSalida(r, t + (r.caminar||0));
+    if(!p) return null;
+    return { ref:p, caminar:r.caminar||0, salida: t + (r.caminar||0) + p.enMin };
+  }
+  return { ref:null, caminar:0, salida: t };
+}
+// caché de opciones de viaje
+const _opsCache = new Map();
+function opcionesDeViaje(destino, desdeMin){
+  const cacheKey = destino+'|'+desdeMin+'|'+estado.rutas.length;
+  if(_opsCache.has(cacheKey)) return _opsCache.get(cacheKey);
+  const origen = zona();
+  const items = itemsDeViaje();
+  const res = [];
+  function buscar(cadena, visitados){
+    if(cadena.length >= 4) return;
+    const prev = cadena[cadena.length-1];
+    for(let i=0; i<items.length; i++){
+      const r = items[i];
+      if(cadena.some(c=>c.r.id === r.id)) continue;
+      if(visitados.has(normLugar(r.destino))) continue;
+      let base;
+      if(cadena.length === 0){
+        if(!lugaresIguales(r.origen, origen)) continue;
+        base = desdeMin;
+      } else {
+        if(!lugaresIguales(r.origen, prev.r.destino)) continue;
+        base = prev.s.salida + (prev.r.duracion||0) + (TRANSB_MIN[r.tipo]||10);
+      }
+      const s = salidaDesde(r, base);
+      if(!s) continue;
+      const nueva = cadena.concat([{r, s}]);
+      const nuevos = new Set(visitados); nuevos.add(normLugar(r.destino));
+      if(lugaresIguales(r.destino, destino)){
+        const llegada = s.salida + (r.duracion||0);
+        const costo = nueva.reduce((a,c)=>a+(c.r.precio||0),0);
+        res.push({
+          kind: nueva.length===1 ? 'directo' : nueva.length===2 ? 'conexion' : 'doble',
+          destino, legs:nueva, llegada, costo, minutos: llegada - desdeMin
+        });
+      }
+      buscar(nueva, nuevos);
+    }
+  }
+  buscar([], new Set([normLugar(origen)]));
+  res.sort((a,b)=> a.costo - b.costo || a.llegada - b.llegada || a.minutos - b.minutos);
+  const porEstrategia = new Map();
+  res.forEach(o=>{
+    let key;
+    if(o.legs.length === 1){
+      key = 'dir:' + (o.legs[0].r.empresa || o.legs[0].r.tipo);
+    } else {
+      key = o.legs.map(l=>
+        l.r.tipo === 'taxi' ? 'taxi' :
+        l.r.tipo === 'pie' ? 'pie' :
+        (l.r.empresa || l.r.nombre)
+      ).join('>');
+    }
+    const cur = porEstrategia.get(key);
+    if(!cur || o.costo < cur.costo || (o.costo === cur.costo && o.llegada < cur.llegada)){
+      porEstrategia.set(key, o);
+    }
+  });
+  const resultado = Array.from(porEstrategia.values())
+    .sort((a,b)=>{
+      const aTaxi = a.legs.some(l=>l.r.tipo==='taxi');
+      const bTaxi = b.legs.some(l=>l.r.tipo==='taxi');
+      if(aTaxi !== bTaxi) return aTaxi ? 1 : -1;
+      return a.costo - b.costo || a.llegada - b.llegada;
+    })
+    .slice(0,5);
+  // limitar caché a 200 entradas
+  if(_opsCache.size > 200) _opsCache.clear();
+  _opsCache.set(cacheKey, resultado);
+  return resultado;
+}
+function empTagHtml(empresa){
+  if(!empresa) return '';
+  const col = colorEmpresa(empresa);
+  return '<span class="empresa-chip" style="background:'+col+'28;color:'+col+'">'+esc(empresa)+'</span>';
+}
+function fmtRango(min){
+  const m = Math.max(0, Math.round(min));
+  return m >= 60 ? (Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'min') : (m+' min');
+}
+function iconoLeg(r){
+  return r.tipo === 'bus' ? '🚌' : r.tipo === 'taxi' ? '🚕' : '🚶';
+}
+function renderViaje(o, i){
+  const best = i === 0 ? ' mejor' : '';
+  const badge = i === 0 ? '<span class="viaje-badge best">⭐ Mejor opción</span>' : '';
+  const nTrans = o.legs.length - 1;
+  const transBadge = nTrans === 0 ? ' <span class="viaje-badge">Directo</span>'
+    : ' <span class="viaje-badge">'+nTrans+' transbordo'+(nTrans>1?'s':'')+'</span>';
+  const saleCasa = o.llegada - o.minutos;
+  let pasos = '';
+
+  // si el primer bus tarda mucho, avisar claramente
+  const primerLeg = o.legs[0];
+  if(primerLeg.r.tipo === 'bus' && primerLeg.s.ref && primerLeg.s.ref.enMin > 25){
+    const esperaBus = primerLeg.s.ref.enMin;
+    pasos += '<div class="vpaso espera" style="border-left-color:#FFB340;background:#FFB34012">'+
+      '<div class="vp-t">⏰ No hay buses a las '+fmtHora(saleCasa)+'</div>'+
+      '<div class="vp-m">El próximo <b>'+esc(primerLeg.r.nombre.split('(')[0].trim())+'</b> sale a las <b>'+primerLeg.s.ref.hora+'</b> · esperas '+fmtCuenta(esperaBus)+' min</div></div>';
+  }
+
+  o.legs.forEach((leg, idx)=>{
+    const r = leg.r;
+    // caminar inicial (solo primera pierna) - solo si el bus es pronto
+    if(idx === 0 && leg.s.caminar){
+      const esperaBus = leg.s.ref ? leg.s.ref.enMin : 0;
+      if(esperaBus <= 25){
+        pasos += '<div class="vpaso walk"><div class="vp-t">🚶 Caminar '+leg.s.caminar+' min hasta la parada</div>'+
+          '<div class="vp-m">Sales de '+esc(zona())+' a las <span class="vp-h">'+fmtHora(saleCasa)+'</span></div></div>';
+      }
+    }
+    // espera en hub (piernas intermedias)
+    if(idx > 0){
+      const prevFin = o.legs[idx-1].s.salida + (o.legs[idx-1].r.duracion||0);
+      const espera = Math.max(0, Math.round(leg.s.salida - prevFin));
+      const hub = o.legs[idx-1].r.destino;
+      const cls = r.tipo === 'pie' ? 'walk' : 'espera';
+      const txt = r.tipo === 'pie'
+        ? '🚶 Caminar desde '+esc(hub)
+        : '⏳ Espera '+espera+' min en '+esc(hub);
+      pasos += '<div class="vpaso '+cls+'"><div class="vp-t">'+txt+'</div>'+
+        (r.tipo === 'pie' ? '' : '<div class="vp-m">Tiempo para bajar y cambiar</div>')+'</div>';
+    }
+    // tramo
+    const horaTxt = leg.s.ref ? 'Sale <span class="vp-h">'+leg.s.ref.hora+'</span>' : (r.tipo==='taxi' ? 'Taxi cuando lo saques' : 'A pie');
+    const llegaA = idx === o.legs.length-1 ? esc(o.destino) : esc(r.destino);
+    const precio = r.precio != null ? ' · $'+fmtNum(r.precio) : '';
+    const aproxTag = r.aprox ? ' ≈' : '';
+    pasos += '<div class="vpaso"><div class="vp-t">'+iconoLeg(r)+' '+esc(r.nombre)+aproxTag+' '+empTagHtml(r.empresa)+'</div>'+
+      '<div class="vp-m">'+horaTxt+' · llega a '+llegaA+' <span class="vp-h">'+fmtHora(leg.s.salida + (r.duracion||0))+'</span>'+
+      (r.duracion ? ' · '+fmtRango(r.duracion) : '')+precio+'</div></div>';
+  });
+  pasos += '<div class="vpaso llega"><div class="vp-t">🏁 Llegas a '+esc(o.destino)+' a las <span class="vp-h">'+fmtHora(o.llegada)+'</span></div>'+
+    '<div class="vp-m">Total: '+fmtRango(o.minutos)+(o.costo?' · $'+fmtNum(o.costo)+' en pasajes':'')+'</div></div>';
+  return '<div class="viaje-card'+best+'">'+
+    '<div class="viaje-head"><div class="dest">🗺️ '+esc(o.destino)+transBadge+
+    '</div>'+badge+'</div>'+
+    '<div class="viaje-pasos">'+pasos+'</div></div>';
+}
+function buscarViaje(){
+  const el = document.getElementById('planDestino');
+  if(!el.value.trim()){ toast('Escribe a dónde vas, ej: UTP 🗺️'); el.focus(); return; }
+  pintarPlan();
+  toast('Buscando el mejor viaje a '+el.value.trim()+'…');
+}
+function pintarPlan(){
+  const hint = document.getElementById('planHint');
+  if(hint) hint.textContent = 'Hora en que sales de casa';
+  // datalist de destinos + chips rápidos
+  const dests = destinosConocidos();
+  const dl = document.getElementById('dlDestinos');
+  if(dl) dl.innerHTML = dests.map(d=>'<option value="'+esc(d)+'">').join('');
+  const chips = document.getElementById('planChips');
+  if(chips) chips.innerHTML = dests.slice(0,5).map(d=>
+    '<button class="plan-chip" onclick="elegirDestino(\''+esc(d)+'\')">'+esc(d)+'</button>').join('');
+  const destino = (document.getElementById('planDestino').value||'').trim();
+  const btnMaps = document.getElementById('btnMaps');
+  if(btnMaps && destino){
+    btnMaps.href = 'https://www.google.com/maps/dir/'+
+      encodeURIComponent(zona()+', Chiriqui, Panama')+'/'+
+      encodeURIComponent('Terminal de Transporte Publico, David, Chiriqui')+'/'+
+      encodeURIComponent(destino+', Chiriqui, Panama');
+  }
+  const v = document.getElementById('planHora').value;
+  const desde = v ? aMin(v) : ahoraMin();
+  const cont = document.getElementById('planRes');
+  const apps = (estado.apps||[]).filter(a=>a.costo != null);
+  const appsHtml = apps.length
+    ? '<div class="plan-linea miss" style="border:none;background:none;padding:8px 0 0">Taxi/Uber si no quieres esperar:</div>'+
+      apps.map(a=>'<div class="plan-linea"><span>'+a.icono+'</span><div style="flex:1;min-width:0">'+esc(a.nombre)+
+        '<div style="font-size:10.5px;color:var(--muted);font-weight:700">cuando quieras · desde '+esc(zona())+'</div></div>'+
+        '<span class="t">~$'+fmtNum(a.costo)+'</span></div>').join('')
+    : '';
+  if(!destino){
+    cont.innerHTML = '<div class="plan-linea miss" style="line-height:1.5">Escribe tu destino (ej: UTP) y te armo el viaje completo, aunque sea con transbordo en el Terminal 🗺️</div>' + appsHtml;
+    return;
+  }
+  const ops = opcionesDeViaje(destino, desde);
+  if(!ops.length){
+    cont.innerHTML = '<div class="plan-linea miss" style="line-height:1.5">No encontré forma de llegar a <b>'+esc(destino)+'</b> con tus horarios. Revisa rutas en ⚙️ Ajustes.</div>' + appsHtml;
+    return;
+  }
+  cont.innerHTML = ops.map(renderViaje).join('') + appsHtml;
+}
+function elegirDestino(d){
+  document.getElementById('planDestino').value = d;
+  pintarPlan();
+}
+
+/* ---------- Rutas ---------- */
+function pintarRutas(){
+  const cont = document.getElementById('listaRutas');
+  const vis = estado.rutas.filter(r=> filtro==='todos' || r.tipo===filtro);
+  if(!vis.length){
+    cont.innerHTML = '<div class="card"><div class="empty">No tienes rutas de ese tipo todavía.<br>Agrégalas en ⚙️ Ajustes.</div></div>';
+    return;
+  }
+  cont.innerHTML = vis.map(r=>{
+    const p = proximaSalida(r);
+    let proxHtml;
+    if(r.tipo === 'bus' && r.horarios && r.horarios.length){
+      const min = Math.max(0, Math.round(p.enMin));
+      const clase = min<=2?'urgent':min<=8?'muy-cerca':min<=20?'cerca':'';
+      proxHtml = '<div class="prox '+clase+'"><div class="en">'+fmtCuenta(min)+' <small>min</small></div><div class="salida">sale '+p.hora+'</div></div>';
+    } else if(r.tipo === 'taxi'){
+      proxHtml = '<div class="prox"><div class="en">'+(r.duracion||'')+' <small>min</small></div><div class="salida">taxi · cuando quieras</div></div>';
+    } else {
+      proxHtml = '<div class="prox"><div class="en">'+(r.duracion||'')+' <small>min</small></div><div class="salida">a pie</div></div>';
+    }
+    let horariosHtml = '';
+    if(r.tipo === 'bus' && r.horarios && r.horarios.length){
+      const ah = ahoraMin();
+      // solo las próximas 6 salidas (no 65 chips ilegibles)
+      const futuros = r.horarios.map(hh=>{
+        let t = aMin(hh), delta = t - ah;
+        if(delta < -0.5) delta += 1440;
+        return { hh, delta, t };
+      }).sort((a,b)=>a.delta-b.delta).slice(0,6);
+      const cada = r.cada ? ' ≈ cada '+r.cada+' min' : '';
+      horariosHtml = '<div class="horarios">'+ futuros.map(f=>{
+        let cls = 'hora-chip';
+        if(f.delta < 0.5) cls += ' saliendo';
+        else if(p && Math.abs(f.delta - p.enMin) < 0.01) cls += ' proxima';
+        return '<span class="'+cls+'">'+f.hh+'</span>';
+      }).join('') + (r.horarios.length > 6 ? '<span class="hora-chip" style="opacity:.55">+'+(r.horarios.length-6)+' más…</span>' : '') +
+      (cada ? '<span class="hora-chip" style="border-style:dashed;opacity:.8">'+cada+'</span>' : '') +
+      '</div>';
+    }
+    const meta = [];
+    if(r.duracion) meta.push(r.duracion+' min de viaje');
+    if(r.caminar) meta.push(r.caminar+' min a la parada');
+    if(r.precio) meta.push('$'+fmtNum(r.precio)+' pasaje');
+    const col = colorEmpresa(r.empresa);
+    const empTag = r.empresa
+      ? '<span class="empresa-chip" style="background:'+col+'28;color:'+col+'">'+esc(r.empresa)+'</span>'
+      : '';
+    const tipoTag = '<span class="badge '+r.tipo+'">'+nombreTipo(r.tipo)+'</span>';
+    return '<div class="card ruta-card">'+
+      '<div class="ruta-ico" style="background:'+col+'22">'+icono(r.tipo)+'</div>'+
+      '<div class="ruta-body">'+
+        '<div class="ruta-nombre">'+esc(r.nombre)+'</div>'+
+        '<div style="margin-top:3px;display:flex;gap:5px;flex-wrap:wrap">'+empTag+tipoTag+'</div>'+
+        '<div class="ruta-detalle" style="margin-top:3px">'+(meta.join(' · ') || 'Sin detalles')+'</div>'+
+        proxHtml + horariosHtml +
+      '</div></div>';
+  }).join('');
+}
+
+/* ---------- Viajes ---------- */
+function abrirViaje(){
+  const sel = document.getElementById('vRuta');
+  const ops = estado.rutas.filter(r=>r.tipo!=='pie');
+  if(!ops.length){ toast('Primero agrega un bus en ⚙️ Ajustes'); return; }
+  sel.innerHTML = ops.map(r=>'<option value="'+r.id+'">'+icono(r.tipo)+' '+esc(r.nombre)+(r.empresa?' · '+esc(r.empresa):'')+'</option>').join('');
+  const d = new Date();
+  document.getElementById('vHora').value = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('vNota').value = '';
+  document.getElementById('viajeMask').classList.add('show');
+}
+function cerrarViaje(ev){
+  if(ev && ev.target !== document.getElementById('viajeMask')) return;
+  document.getElementById('viajeMask').classList.remove('show');
+}
+function abrirSheet(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(id === 'claseSheet'){
+    document.getElementById('inpClaseNombre').value = '';
+    document.getElementById('inpClaseHora').value = '';
+  }
+  el.classList.add('show');
+}
+function cerrarSheet(id, ev){
+  if(ev && ev.target !== document.getElementById(id)) return;
+  document.getElementById(id).classList.remove('show');
+}
+function guardarViaje(){
+  const rutaId = document.getElementById('vRuta').value;
+  const r = estado.rutas.find(x=>x.id===rutaId);
+  if(!r){ toast('Elige una ruta'); return; }
+  const hora = document.getElementById('vHora').value || new Date().toTimeString().slice(0,5);
+  estado.viajes.unshift({
+    id:'v'+Date.now(), fecha: hoyFecha(), hora, rutaId,
+    rutaNombre: r.nombre, tipo: r.tipo, empresa: r.empresa || '',
+    nota: document.getElementById('vNota').value.trim()
+  });
+  guardar();
+  cerrarViaje();
+  pintarViajes();
+  pintarBitacora();
+  toast('Viaje registrado a las '+hora+' 🚌');
+}
+function borrarViaje(id){
+  estado.viajes = estado.viajes.filter(v=>v.id!==id);
+  guardar(); pintarViajes(); pintarBitacora(); toast('Viaje borrado 🗑️');
+}
+let filtroBitacora = 'todos';
+function setFiltroBitacora(f, btn){
+  filtroBitacora = f;
+  document.querySelectorAll('#sec-bitacora .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  pintarBitacora();
+}
+function pintarBitacora(){
+  // resumen de hoy
+  const hoyEl = document.getElementById('bitacoraHoy');
+  if(hoyEl){
+    const hoy = hoyFecha();
+    const viajesHoy = estado.viajes.filter(v=>v.fecha===hoy);
+    if(!viajesHoy.length){
+      hoyEl.textContent = 'Aún no registras viajes hoy 🚌';
+    } else {
+      const buses = viajesHoy.filter(v=>v.tipo==='bus').length;
+      const taxis = viajesHoy.filter(v=>v.tipo==='taxi').length;
+      const pies = viajesHoy.filter(v=>v.tipo==='pie').length;
+      const parts = [];
+      if(buses) parts.push(buses+' bus'+(buses>1?'es':''));
+      if(taxis) parts.push(taxis+' taxi');
+      if(pies) parts.push(pies+' caminata'+(pies>1?'s':''));
+      const horas = viajesHoy.map(v=>v.hora).sort();
+      hoyEl.innerHTML = parts.join(' · ')+'<br><span style="opacity:.7">Primero: '+horas[0]+' · Último: '+horas[horas.length-1]+'</span>';
+    }
+  }
+  // historial filtrado
+  const cont = document.getElementById('listaBitacora');
+  if(!cont) return;
+  const vis = estado.viajes.filter(v=> filtroBitacora==='todos' || v.tipo===filtroBitacora);
+  if(!vis.length){
+    cont.innerHTML = '<div class="card"><div class="empty">Sin viajes registrados.<br>Registra cuando agarres el bus 🚌</div></div>';
+    return;
+  }
+  // agrupar por fecha
+  const porFecha = {};
+  vis.forEach(v=>{
+    if(!porFecha[v.fecha]) porFecha[v.fecha] = [];
+    porFecha[v.fecha].push(v);
+  });
+  const NOM_DIA = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let html = '';
+  Object.keys(porFecha).sort().reverse().slice(0,14).forEach(fecha=>{
+    const d = new Date(fecha+'T12:00:00');
+    const esHoy = fecha === hoyFecha();
+    const etiqueta = esHoy ? 'Hoy' : NOM_DIA[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1);
+    html += '<div class="card" style="margin-bottom:8px">'+
+      '<div style="font-size:13px;font-weight:700;opacity:.75;margin-bottom:6px'+(esHoy?';color:#3A8FFF':'')+'">'+etiqueta+'</div>';
+    porFecha[fecha].sort((a,b)=>a.hora.localeCompare(b.hora)).forEach(v=>{
+      const col = colorEmpresa(v.empresa);
+      html += '<div class="fila" style="margin-bottom:4px">'+
+        '<span style="font-size:15px">'+icono(v.tipo||'bus')+'</span>'+
+        '<div class="info"><b>'+v.hora+'</b> · '+esc(v.rutaNombre)+
+          (v.empresa?' <span style="color:'+col+';font-weight:700">'+esc(v.empresa)+'</span>':'')+
+          (v.nota?'<br><span style="font-size:11px;opacity:.65">'+esc(v.nota)+'</span>':'')+
+        '</div>'+
+        '<button class="btn small ghost" onclick="borrarViaje(\''+v.id+'\')" style="color:#FF8A80">✕</button>'+
+      '</div>';
+    });
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+}
+function pintarViajes(){
+  const cont = document.getElementById('listaViajes');
+  if(!estado.viajes.length){
+    cont.innerHTML = '<div class="card"><div class="empty">Sin viajes registrados todavía.<br>Toca el botón 🚌 azul para registrar cuando agarras el bus.</div></div>';
+    return;
+  }
+  cont.innerHTML = '<div class="card">'+ estado.viajes.slice(0, 20).map(v=>{
+    const col = colorEmpresa(v.empresa);
+    return '<div class="fila" style="margin-bottom:6px">'+
+      '<span style="font-size:16px">'+icono(v.tipo||'bus')+'</span>'+
+      '<div class="info"><b>'+esc(v.rutaNombre)+'</b>'+
+        v.fecha.slice(8)+'/'+v.fecha.slice(5,7)+' a las '+v.hora+
+        (v.empresa?' · <span style="color:'+col+';font-weight:800">'+esc(v.empresa)+'</span>':'')+
+        (v.nota?' · '+esc(v.nota):'')+
+      '</div>'+
+      '<button class="btn small ghost" onclick="borrarViaje(\''+v.id+'\')" style="color:#FF8A80">🗑️</button>'+
+    '</div>';
+  }).join('') +'</div>';
+}
+
+/* ---------- Bajadas y caminatas ---------- */
+function pintarBajadas(){
+  const cont = document.getElementById('listaBajadas');
+  if(!estado.bajadas.length){
+    cont.innerHTML = '<div class="card"><div class="empty">Sin bajadas anotadas todavía.</div></div>';
+  } else {
+    cont.innerHTML = estado.bajadas.map(b=>
+      '<div class="bajada-item">'+
+        '<input type="radio" name="bjFav" class="radio-mini" '+(estado.bajadaFav===b.id?'checked':'')+' onchange="elegirBajadaFav(\''+b.id+'\')">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="donde">'+esc(b.lugar)+'</div>'+
+          '<div class="consejo">'+esc(b.ruta||'')+(b.consejo?' · '+esc(b.consejo):'')+'</div>'+
+          (b.pasos!=null && b.pasos!=='' ? '<div class="pasos">🚶 '+b.pasos+' min caminando</div>' : '')+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:4px">'+
+          '<button class="btn small ghost" onclick="editarBajada(\''+b.id+'\')">✏️</button>'+
+          '<button class="btn small ghost" onclick="borrarBajada(\''+b.id+'\')" style="color:#FF8A80">🗑️</button>'+
+        '</div>'+
+      '</div>'
+    ).join('');
+  }
+  pintarCaminataStats();
+  pintarCaminatas();
+}
+function elegirBajadaFav(id){
+  estado.bajadaFav = id; guardar();
+  const b = estado.bajadas.find(x=>x.id===id);
+  toast('Bajada de siempre: '+(b?b.lugar:'')+' 📍');
+}
+function abrirEditorBajada(){
+  editandoBjId = null;
+  ['bjLugar','bjRuta','bjPasos','bjConsejo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('bajadaMask').classList.add('show');
+}
+function cerrarEditorBajada(ev){
+  if(ev && ev.target !== document.getElementById('bajadaMask')) return;
+  document.getElementById('bajadaMask').classList.remove('show');
+}
+function guardarBajadaEd(){
+  const lugar = document.getElementById('bjLugar').value.trim();
+  if(!lugar){ toast('Ponle nombre al lugar 😅'); return; }
+  const obj = {
+    id: editandoBjId || ('b'+Date.now()), lugar,
+    ruta: document.getElementById('bjRuta').value.trim(),
+    pasos: document.getElementById('bjPasos').value.trim(),
+    consejo: document.getElementById('bjConsejo').value.trim()
+  };
+  if(editandoBjId){
+    const i = estado.bajadas.findIndex(b=>b.id===editandoBjId);
+    if(i >= 0) estado.bajadas[i] = obj;
+    toast('Bajada actualizada ✅');
+  } else {
+    estado.bajadas.push(obj);
+    toast('Bajada guardada ✅');
+  }
+  guardar(); pintarBajadas(); cerrarEditorBajada();
+}
+function editarBajada(id){
+  const b = estado.bajadas.find(x=>x.id===id);
+  if(!b) return;
+  editandoBjId = id;
+  document.getElementById('bjLugar').value = b.lugar || '';
+  document.getElementById('bjRuta').value = b.ruta || '';
+  document.getElementById('bjPasos').value = b.pasos || '';
+  document.getElementById('bjConsejo').value = b.consejo || '';
+  document.getElementById('bajadaMask').classList.add('show');
+}
+function borrarBajada(id){
+  estado.bajadas = estado.bajadas.filter(b=>b.id!==id);
+  if(estado.bajadaFav === id) estado.bajadaFav = null;
+  guardar(); pintarBajadas(); toast('Bajada borrada 🗑️');
+}
+function abrirCaminata(){
+  const sel = document.getElementById('cBajada');
+  sel.innerHTML = '<option value="">(sin lugar)</option>' +
+    estado.bajadas.map(b=>'<option value="'+b.id+'">'+esc(b.lugar)+'</option>').join('');
+  if(estado.bajadaFav) sel.value = estado.bajadaFav;
+  document.getElementById('cMin').value = '';
+  document.getElementById('cNota').value = '';
+  document.getElementById('caminataMask').classList.add('show');
+}
+function cerrarCaminata(ev){
+  if(ev && ev.target !== document.getElementById('caminataMask')) return;
+  document.getElementById('caminataMask').classList.remove('show');
+}
+function guardarCaminata(){
+  const min = parseInt(document.getElementById('cMin').value, 10);
+  if(isNaN(min) || min <= 0){ toast('Pon los minutos caminados 🚶'); return; }
+  const bjId = document.getElementById('cBajada').value || null;
+  const bj = bjId ? estado.bajadas.find(b=>b.id===bjId) : null;
+  estado.caminatas.unshift({
+    id:'c'+Date.now(), fecha: hoyFecha(),
+    hora: new Date().toTimeString().slice(0,5),
+    minutos: min, bajadaId: bjId, bajadaNombre: bj ? bj.lugar : '',
+    nota: document.getElementById('cNota').value.trim()
+  });
+  guardar(); cerrarCaminata(); pintarCaminataStats(); pintarCaminatas();
+  toast('Caminata de '+min+' min registrada 🚶');
+}
+function borrarCaminata(id){
+  estado.caminatas = estado.caminatas.filter(c=>c.id!==id);
+  guardar(); pintarCaminataStats(); pintarCaminatas(); toast('Caminata borrada 🗑️');
+}
+function pintarCaminataStats(){
+  const hoy = estado.caminatas.filter(c=>c.fecha===hoyFecha()).reduce((a,c)=>a+c.minutos,0);
+  let sem = 0;
+  for(let i=0;i<7;i++){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    sem += estado.caminatas.filter(c=>c.fecha===fechaDe(d)).reduce((a,c)=>a+c.minutos,0);
+  }
+  const tot = estado.caminatas.reduce((a,c)=>a+c.minutos,0);
+  document.getElementById('camHoy').textContent = hoy;
+  document.getElementById('camSem').textContent = sem;
+  document.getElementById('camTot').textContent = tot;
+}
+function pintarCaminatas(){
+  const cont = document.getElementById('listaCaminatas');
+  if(!estado.caminatas.length){
+    cont.innerHTML = '<div class="card"><div class="empty">Sin caminatas registradas todavía.</div></div>';
+    return;
+  }
+  cont.innerHTML = '<div class="card">'+ estado.caminatas.slice(0, 20).map(c=>
+    '<div class="fila" style="margin-bottom:6px">'+
+      '<span style="font-size:16px">🚶</span>'+
+      '<div class="info"><b>'+c.minutos+' min'+(c.bajadaNombre?' · '+esc(c.bajadaNombre):'')+'</b>'+
+        c.fecha.slice(8)+'/'+c.fecha.slice(5,7)+' '+c.hora+(c.nota?' · '+esc(c.nota):'')+
+      '</div>'+
+      '<button class="btn small ghost" onclick="borrarCaminata(\''+c.id+'\')" style="color:#FF8A80">🗑️</button>'+
+    '</div>'
+  ).join('') +'</div>';
+}
+
+/* ---------- Gastos + precios frecuentes ---------- */
+function gastosDe(fecha){ return estado.gastos.filter(g=>g.fecha===fecha); }
+function totalDe(fecha){ return gastosDe(fecha).reduce((a,g)=>a+(Number(g.monto)||0),0); }
+function totalSemana(){
+  let t = 0;
+  for(let i=0;i<7;i++){ const d = new Date(); d.setDate(d.getDate()-i); t += totalDe(fechaDe(d)); }
+  return t;
+}
+function pagoRapido(id){
+  const f = estado.frecuentes.find(x=>x.id===id);
+  if(!f) return;
+  estado.gastos.unshift({
+    id:'g'+Date.now(), fecha: hoyFecha(),
+    hora: new Date().toTimeString().slice(0,5),
+    monto: f.precio, metodo:'Efectivo',
+    tipo: (()=>{ const n = f.nombre.toLowerCase(); return n.includes('taxi') ? 'taxi' : n.includes('uber') ? 'uber' : n.includes('indriver') ? 'indriver' : 'bus'; })(),
+    nota: f.nombre
+  });
+  guardadoGasto('Gasto de $'+fmtNum(f.precio)+' guardado 💸');
+}
+function guardadoGasto(msg){
+  guardar(); pintarGastos(); toast(msg);
+}
+function guardarGasto(){
+  const monto = parseFloat(document.getElementById('gMonto').value);
+  if(isNaN(monto) || monto < 0){ toast('Pon un monto válido 💸'); return; }
+  estado.gastos.unshift({
+    id:'g'+Date.now(), fecha: hoyFecha(),
+    hora: new Date().toTimeString().slice(0,5),
+    monto, metodo: document.getElementById('gMetodo').value,
+    tipo: document.getElementById('gTipo').value,
+    nota: document.getElementById('gNota').value.trim()
+  });
+  guardar();
+  document.getElementById('gMonto').value = '';
+  document.getElementById('gNota').value = '';
+  pintarGastos();
+  toast('Gasto guardado 💸');
+}
+function borrarGasto(id){
+  estado.gastos = estado.gastos.filter(g=>g.id!==id);
+  guardar(); pintarGastos(); toast('Gasto borrado 🗑️');
+}
+function pintarFrecuentes(){
+  const row = document.getElementById('frecuentesRow');
+  if(!estado.frecuentes.length){
+    row.innerHTML = '<div class="empty" style="padding:8px;width:100%">Sin precios frecuentes. Agrega en ⚙️ Ajustes.</div>';
+  } else {
+    row.innerHTML = estado.frecuentes.map(f=>
+      '<button class="chip-btn" onclick="pagoRapido(\''+f.id+'\')">'+esc(f.nombre)+' <span class="precio">$'+fmtNum(f.precio)+'</span></button>'
+    ).join('');
+  }
+  const edit = document.getElementById('frecuentesEdit');
+  edit.innerHTML = estado.frecuentes.map(f=>
+    '<span class="chip-btn" style="cursor:default">'+esc(f.nombre)+' <span class="precio">$'+fmtNum(f.precio)+'</span>'+
+      ' <button class="btn small ghost" onclick="borrarFrecuente(\''+f.id+'\')" style="padding:2px 6px;margin-left:2px;color:#FF8A80">✕</button>'+
+    '</span>'
+  ).join('') || '<div class="empty" style="padding:6px">Sin precios todavía.</div>';
+}
+function abrirFrecuente(){
+  document.getElementById('frNombre').value = '';
+  document.getElementById('frPrecio').value = '';
+  document.getElementById('frecMask').classList.add('show');
+}
+function cerrarFrecuente(ev){
+  if(ev && ev.target !== document.getElementById('frecMask')) return;
+  document.getElementById('frecMask').classList.remove('show');
+}
+function guardarFrecuente(){
+  const nombre = document.getElementById('frNombre').value.trim();
+  const precio = parseFloat(document.getElementById('frPrecio').value);
+  if(!nombre){ toast('Ponle nombre 😅'); return; }
+  if(isNaN(precio) || precio < 0){ toast('Pon un precio válido 💸'); return; }
+  estado.frecuentes.push({ id:'f'+Date.now(), nombre, precio });
+  guardar(); pintarFrecuentes(); cerrarFrecuente();
+  toast('Precio guardado ✅');
+}
+function borrarFrecuente(id){
+  estado.frecuentes = estado.frecuentes.filter(f=>f.id!==id);
+  guardar(); pintarFrecuentes(); toast('Precio borrado 🗑️');
+}
+function pintarGastos(){
+  document.getElementById('gastoSemana').textContent = '$'+fmtNum(totalSemana());
+  document.getElementById('gastoHoy').textContent = '$'+fmtNum(totalDe(hoyFecha()));
+  pintarDinero();
+  const NOM = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const datos = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    datos.push({ dia: NOM[d.getDay()], total: totalDe(fechaDe(d)) });
+  }
+  const max = Math.max(...datos.map(x=>x.total), 0.5);
+  const chart = document.getElementById('gastoChart');
+  chart.innerHTML = datos.map(x=>{
+    const h = Math.round((x.total/max)*100);
+    return '<div class="bcol" title="'+x.dia+': $'+fmtNum(x.total)+'"><div class="barra" data-h="'+h+'"></div><div class="d">'+x.dia[0]+'</div></div>';
+  }).join('');
+  requestAnimationFrame(()=>chart.querySelectorAll('.barra').forEach(b=>b.style.height=b.dataset.h+'%'));
+  const cont = document.getElementById('listaGastos');
+  if(!estado.gastos.length){ cont.innerHTML = '<div class="card"><div class="empty">Sin gastos registrados todavía.<br>Usa el pago rápido o agrega otro.</div></div>'; return; }
+  cont.innerHTML = '<div class="card">'+ estado.gastos.slice(0, 30).map(g=>
+    '<div class="fila" style="margin-bottom:6px">'+
+      '<span style="font-size:16px">'+icono(g.tipo==='otro'?'pie':g.tipo)+'</span>'+
+      '<div class="info"><b>$'+fmtNum(g.monto)+' · '+esc(g.metodo)+'</b>'+
+        g.fecha.slice(8)+'/'+g.fecha.slice(5,7)+' '+g.hora+(g.nota?' · '+esc(g.nota):'')+
+      '</div>'+
+      '<button class="btn small ghost" onclick="borrarGasto(\''+g.id+'\')" style="color:#FF8A80">🗑️</button>'+
+    '</div>'
+  ).join('') +'</div>';
+  pintarFrecuentes();
+  pintarPresupuesto();
+  pintarAhorro();
+  pintarApps();
+}
+
+/* ---------- Dinero del día ---------- */
+function setDineroDia(){
+  const v = parseFloat(document.getElementById('inpDineroDia').value);
+  if(isNaN(v) || v < 0){ toast('Monto inválido 💸'); return; }
+  estado.dinero = { dia: hoyFecha(), monto: v };
+  guardar(); pintarDinero(); toast('Te dieron $'+fmtNum(v)+' hoy 🪙');
+}
+function pintarDinero(){
+  const el = document.getElementById('dineroContenido');
+  if(!el) return;
+  const d = estado.dinero || { dia:'', monto:0 };
+  const esHoy = d.dia === hoyFecha();
+  const monto = esHoy ? d.monto : 0;
+  const gastado = totalDe(hoyFecha());
+  const queda = monto - gastado;
+  const pct = monto > 0 ? Math.max(0, Math.min(100, (gastado/monto)*100)) : 0;
+  const barCol = !monto ? '#94A3B8' : pct >= 100 ? '#FF6B6B' : pct >= 85 ? '#FFB340' : '#4ADE80';
+  el.innerHTML =
+    '<div class="row" style="gap:8px;align-items:center;margin-bottom:8px">'+
+      '<input type="number" id="inpDineroDia" min="0" step="0.25" placeholder="Monto recibido" value="'+(esHoy?d.monto:'')+'">'+
+      '<button class="btn small" style="width:auto;flex:0 0 auto" onclick="setDineroDia()">Guardar</button>'+
+    '</div>'+
+    (monto > 0
+      ? '<div style="margin-bottom:6px;font-size:14px">'+
+          'Te dieron <b>$'+fmtNum(monto)+'</b> · gastaste <b style="color:#FF8A80">$'+fmtNum(gastado)+'</b> · '+
+          (queda >= 0
+            ? 'te quedan <b style="color:#4ADE80">$'+fmtNum(queda)+'</b>'
+            : 'te faltan <b style="color:#FF6B6B">$'+fmtNum(Math.abs(queda))+'</b>')+
+        '</div>'+
+        '<div style="height:8px;border-radius:6px;background:var(--bg2,#1E293B);overflow:hidden">'+
+          '<div style="height:100%;width:'+pct+'%;background:'+barCol+';transition:width .4s"></div>'+
+        '</div>'+
+        '<div class="hint" style="margin-top:6px">'+(esHoy?'Se reinicia mañana':'No te dieron plata hoy aún')+'</div>'
+      : '<div class="hint">¿Cuánto te dieron hoy? Guárdalo y cuenta los gastos 💸</div>');
+}
+
+/* ---------- Universidad (clases) ---------- */
+function guardarClase(){
+  const nom = document.getElementById('inpClaseNombre').value.trim();
+  const dia = parseInt(document.getElementById('inpClaseDia').value, 10);
+  const hora = document.getElementById('inpClaseHora').value;
+  if(!nom || isNaN(dia) || !hora){ toast('Completa nombre, día y hora 📚'); return; }
+  estado.clases.push({ id:'c'+Date.now(), nombre:nom, dia, hora });
+  estado.clases.sort((a,b)=> a.dia - b.dia || a.hora.localeCompare(b.hora));
+  guardar(); cerrarSheet('claseSheet'); pintarUniversidad(); toast('Clase agregada 📚');
+}
+function borrarClase(id){
+  estado.clases = estado.clases.filter(c=>c.id!==id);
+  guardar(); pintarUniversidad(); toast('Clase borrada 🗑️');
+}
+function proximaClase(){
+  const ahora = new Date();
+  const hoy = ahora.getDay();
+  const minsAhora = ahora.getHours()*60 + ahora.getMinutes();
+  let mejor = null;
+  for(let offset=0; offset<=7; offset++){
+    const diaIdx = (hoy + offset) % 7;
+    for(const c of estado.clases){
+      if(c.dia !== diaIdx) continue;
+      const t = aMin(c.hora);
+      if(offset === 0 && t < minsAhora + 5) continue; // ya pasó o muy pronto
+      const mins = offset*1440 + t - minsAhora;
+      if(!mejor || mins < mejor.enMin) mejor = { clase:c, enMin:mins, diaIdx, offset };
+    }
+  }
+  return mejor;
+}
+function buscarViajeParaClase(tClase){
+  let mejor = null;
+  for(let t = Math.max(0, tClase - 240); t <= tClase - 15; t += 10){
+    const ops = opcionesDeViaje('UTP', t);
+    for(let j=0; j<ops.length; j++){
+      const o = ops[j];
+      if(o.llegada <= tClase && o.minutos > 0){
+        if(!mejor || o.llegada > mejor.llegada || (o.llegada === mejor.llegada && o.costo < mejor.costo)){
+          mejor = o;
+        }
+      }
+    }
+  }
+  return mejor;
+}
+function pintarUniversidad(){
+  // tarjeta resumen en Inicio
+  const el = document.getElementById('uniContenido');
+  if(el){
+    if(!estado.clases.length){
+      el.innerHTML = '<div class="hint" style="margin-bottom:8px">Agrega tus clases en 📚 Uni</div>';
+    } else {
+      const prox = proximaClase();
+      if(prox){
+        const col = '#3A8FFF';
+        const enH = Math.floor(prox.enMin/60), enM = Math.round(prox.enMin%60);
+        const cuando = prox.offset === 0 ? 'hoy' : prox.offset === 1 ? 'mañana' : DIAS_CORTO[prox.diaIdx];
+        const tClase = aMin(prox.clase.hora);
+        const mejor = buscarViajeParaClase(tClase);
+        el.innerHTML = '<div style="background:'+col+'18;border-left:3px solid '+col+';border-radius:8px;padding:10px">'+
+          '<div style="font-weight:600;font-size:15px">📚 '+esc(prox.clase.nombre)+'</div>'+
+          '<div style="font-size:13px;opacity:.85">'+DIAS_FULL[prox.diaIdx]+' · '+prox.clase.hora+' · '+cuando+' (en '+(enH>0?enH+'h ':'')+enM+'m)</div>'+
+          (mejor ? '<div style="font-size:13px;margin-top:4px">🚗 Sal de casa a las <b>'+fmtHora(Math.max(0, Math.round(mejor.llegada - mejor.minutos)))+'</b> · llegas '+fmtHora(mejor.llegada)+'</div>' : '')+
+        '</div>';
+      } else {
+        el.innerHTML = '<div class="hint">No tienes más clases 🎉</div>';
+      }
+    }
+  }
+  // sección completa 📚
+  const secProx = document.getElementById('uniProxima');
+  const secHor = document.getElementById('uniHorario');
+  if(!secProx || !secHor) return;
+  // próxima clase grande
+  const prox2 = proximaClase();
+  if(prox2){
+    const tClase = aMin(prox2.clase.hora);
+    const mejor = buscarViajeParaClase(tClase);
+    const enH = Math.floor(prox2.enMin/60), enM = Math.round(prox2.enMin%60);
+    const cuando = prox2.offset === 0 ? 'hoy' : prox2.offset === 1 ? 'mañana' : DIAS_FULL[prox2.diaIdx];
+    secProx.innerHTML = '<div class="card" style="border-left:3px solid #3A8FFF;background:linear-gradient(135deg,#3A8FFF18,#3A8FFF08)">'+
+      '<div class="hint" style="margin-bottom:4px">Próxima clase · '+cuando+'</div>'+
+      '<div style="font-size:20px;font-weight:800;margin-bottom:2px">'+esc(prox2.clase.nombre)+'</div>'+
+      '<div style="font-size:15px;font-weight:650;margin-bottom:8px">'+prox2.clase.hora+' · en '+(enH>0?enH+'h ':'')+enM+'m</div>'+
+      (mejor
+        ? '<div style="font-size:14px">🚗 <b>Sal de casa a las '+fmtHora(Math.max(0, Math.round(mejor.llegada - mejor.minutos)))+'</b></div>'+
+          '<div style="font-size:13px;opacity:.8;margin-top:2px">Llegas UTP '+fmtHora(mejor.llegada)+' · $'+fmtNum(mejor.costo)+' · '+(mejor.legs.length>1?mejor.legs.length+' tramos':'directo')+'</div>'
+        : '<div style="font-size:13px;opacity:.7">No encontré bus antes de esa hora</div>')+
+    '</div>';
+  } else {
+    secProx.innerHTML = '<div class="card"><div class="empty">No tienes clases 🎉</div></div>';
+  }
+  // horario semanal
+  if(!estado.clases.length){ secHor.innerHTML = ''; return; }
+  const hoy = new Date().getDay();
+  const ahoraM = ahoraMin();
+  let html = '<div class="card">';
+  for(let d=1; d<=7; d++){
+    const diaIdx = d % 7; // Lun=1..Dom=0
+    const clasesDia = estado.clases.filter(c=>c.dia===diaIdx);
+    if(!clasesDia.length) continue;
+    const esHoy = diaIdx === hoy;
+    html += '<div style="margin-bottom:10px'+(esHoy?';background:#3A8FFF12;border-radius:8px;padding:8px':'')+'">'+
+      '<div style="font-size:13px;font-weight:700;opacity:.8;margin-bottom:4px'+(esHoy?';color:#3A8FFF':'')+'">'+DIAS_FULL[diaIdx]+(esHoy?' · HOY':'')+'</div>';
+    clasesDia.forEach(c=>{
+      const t = aMin(c.hora);
+      const pasado = esHoy && t + 45 < ahoraM;
+      const ahoraClase = esHoy && t <= ahoraM && ahoraM < t + 45;
+      html += '<div style="display:flex;gap:8px;align-items:center;padding:3px 0'+(pasado?';opacity:.4':'')+(ahoraClase?';border-left:3px solid #FFB340;padding-left:8px':'')+'">'+
+        '<b style="font-size:13px;font-variant-numeric:tabular-nums;min-width:42px">'+c.hora+'</b>'+
+        '<span style="font-size:13px;flex:1">'+esc(c.nombre)+'</span>'+
+        (ahoraClase?'<span style="font-size:11px;color:#FFB340;font-weight:700">AHORA</span>':'')+
+        '<button class="btn small ghost" onclick="borrarClase(\''+c.id+'\')" style="color:#FF8A80;padding:2px 6px">✕</button>'+
+      '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  secHor.innerHTML = html;
+}
+
+/* ---------- Notas ---------- */
+function guardarNota(){
+  const txt = document.getElementById('inpNota').value.trim();
+  if(!txt){ toast('Escribe algo primero ✍️'); return; }
+  estado.notas.unshift({ id:'n'+Date.now(), fecha: hoyFecha(), hora: new Date().toTimeString().slice(0,5), txt });
+  guardar();
+  document.getElementById('inpNota').value = '';
+  pintarNotas();
+  toast('Nota guardada ✍️');
+}
+function borrarNota(id){
+  estado.notas = estado.notas.filter(n=>n.id!==id);
+  guardar(); pintarNotas(); toast('Nota borrada 🗑️');
+}
+function pintarNotas(){
+  const cont = document.getElementById('listaNotas');
+  if(!estado.notas.length){ cont.innerHTML = '<div class="card"><div class="empty">Sin notas todavía.</div></div>'; return; }
+  cont.innerHTML = '<div class="card">'+ estado.notas.slice(0, 20).map(n=>
+    '<div class="nota-row" style="margin-bottom:6px">'+
+      '<div class="txt">'+esc(n.txt)+'</div>'+
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">'+
+        '<div class="hora">'+n.fecha.slice(8)+'/'+n.fecha.slice(5,7)+' '+n.hora+'</div>'+
+        '<button class="btn small ghost" onclick="borrarNota(\''+n.id+'\')" style="color:#FF8A80">🗑️</button>'+
+      '</div>'+
+    '</div>'
+  ).join('') +'</div>';
+}
+
+/* ---------- Editor de rutas ---------- */
+function abrirEditor(){
+  editandoId = null;
+  document.getElementById('edTitulo').textContent = 'Nueva ruta';
+  document.getElementById('edEmpresa').value = '';
+  document.getElementById('edTipo').value = 'bus';
+  ['edNombre','edOrigen','edDestino','edHorarios','edDur','edCam','edPrecio'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('genCada').value = '';
+  cambiarTipoEd();
+  document.getElementById('editorMask').classList.add('show');
+}
+function cerrarEditor(ev){
+  if(ev && ev.target !== document.getElementById('editorMask')) return;
+  document.getElementById('editorMask').classList.remove('show');
+}
+function cambiarTipoEd(){
+  const t = document.getElementById('edTipo').value;
+  const mostrarHorarios = t === 'bus';
+  document.getElementById('genBox').style.display = mostrarHorarios ? '' : 'none';
+  document.getElementById('edHorariosLab').style.display = mostrarHorarios ? '' : 'none';
+  document.getElementById('edHorarios').style.display = mostrarHorarios ? '' : 'none';
+  document.getElementById('edCamLab').style.display = t === 'pie' ? 'none' : '';
+  document.getElementById('edCam').style.display = t === 'pie' ? 'none' : '';
+}
+document.getElementById('edTipo').addEventListener('change', cambiarTipoEd);
+function generarHorarios(){
+  const desde = document.getElementById('genDesde').value;
+  const hasta = document.getElementById('genHasta').value;
+  const cada = parseInt(document.getElementById('genCada').value, 10);
+  const lista = expandirHorarios(desde, hasta, cada);
+  if(!desde || !hasta || isNaN(cada) || cada <= 0){ toast('Pone desde, hasta y cada cuántos min'); return; }
+  if(!lista.length){ toast('Revisa el rango o usa menos frecuencia'); return; }
+  document.getElementById('edHorarios').value = lista.join(', ');
+  toast(lista.length+' horarios generados ⚡');
+}
+function guardarRutaEd(){
+  const tipo = document.getElementById('edTipo').value;
+  const empresa = document.getElementById('edEmpresa').value;
+  const origen = document.getElementById('edOrigen').value.trim();
+  const destino = document.getElementById('edDestino').value.trim();
+  let nombre = document.getElementById('edNombre').value.trim();
+  const dur = parseInt(document.getElementById('edDur').value, 10);
+  const cam = parseInt(document.getElementById('edCam').value, 10);
+  const precio = parseFloat(document.getElementById('edPrecio').value);
+  if(tipo === 'bus' && (!origen || !destino)){ toast('Pone origen y destino, ej: Dolega y Terminal 📍'); return; }
+  if(!nombre && origen && destino) nombre = origen+' → '+destino;
+  if(!nombre){ toast('Ponle nombre a la ruta 😅'); return; }
+  const horarios = document.getElementById('edHorarios').value.trim()
+    ? document.getElementById('edHorarios').value.trim().split(',').map(s=>s.trim()).filter(s=>/^\d{1,2}:\d{2}$/.test(s))
+    : [];
+  if(tipo === 'bus' && !horarios.length){ toast('Pone al menos un horario, ej: 06:30'); return; }
+  const obj = {
+    id: editandoId || ('r'+Date.now()),
+    tipo, empresa, nombre, origen, destino, horarios,
+    duracion: isNaN(dur) ? null : dur,
+    caminar: isNaN(cam) ? null : cam,
+    precio: isNaN(precio) ? null : precio
+  };
+  if(tipo === 'bus' && horarios.length >= 3){
+    const ts = horarios.map(aMin).sort((a,b)=>a-b);
+    const diffs = [];
+    for(let i=1;i<ts.length;i++){ const d = ts[i]-ts[i-1]; if(d > 0 && d <= 120) diffs.push(d); }
+    if(diffs.length){ diffs.sort((a,b)=>a-b); obj.cada = diffs[Math.floor(diffs.length/2)]; }
+  }
+  if(editandoId){
+    const i = estado.rutas.findIndex(r=>r.id===editandoId);
+    if(i >= 0) estado.rutas[i] = obj;
+    toast('Ruta actualizada ✅');
+  } else {
+    estado.rutas.push(obj);
+    toast('Ruta guardada ✅');
+  }
+  guardar(); pintarTodo(); cerrarEditor();
+}
+function editarRuta(id){
+  const r = estado.rutas.find(x=>x.id===id);
+  if(!r) return;
+  editandoId = id;
+  document.getElementById('edTitulo').textContent = 'Editar ruta';
+  document.getElementById('edEmpresa').value = r.empresa || '';
+  document.getElementById('edTipo').value = r.tipo;
+  document.getElementById('edNombre').value = r.nombre;
+  document.getElementById('edOrigen').value = r.origen || '';
+  document.getElementById('edDestino').value = r.destino || '';
+  document.getElementById('edHorarios').value = (r.horarios||[]).join(', ');
+  document.getElementById('edDur').value = r.duracion || '';
+  document.getElementById('edCam').value = r.caminar || '';
+  document.getElementById('edPrecio').value = r.precio || '';
+  cambiarTipoEd();
+  document.getElementById('editorMask').classList.add('show');
+}
+function borrarRuta(id){
+  estado.rutas = estado.rutas.filter(r=>r.id!==id);
+  guardar(); pintarTodo(); toast('Ruta borrada 🗑️');
+}
+function pintarListaRutasEdit(){
+  const cont = document.getElementById('listaRutasEdit');
+  if(!estado.rutas.length){ cont.innerHTML = '<div class="empty">Sin rutas. Agrega arriba 👆</div>'; return; }
+  cont.innerHTML = estado.rutas.map(r=>{
+    const col = colorEmpresa(r.empresa);
+    return '<div class="fila">'+
+      '<span style="font-size:17px">'+icono(r.tipo)+'</span>'+
+      '<div class="info"><b>'+esc(r.nombre)+'</b><span>'+
+        (r.empresa?'<span style="color:'+col+'">'+esc(r.empresa)+'</span> · ':'')+
+        ((r.horarios||[]).length||0)+' horarios · '+(r.precio?'$'+fmtNum(r.precio):'s/pasaje')+
+      '</span></div>'+
+      '<button class="btn small ghost" onclick="editarRuta(\''+r.id+'\')">✏️</button>'+
+      '<button class="btn small ghost" onclick="borrarRuta(\''+r.id+'\')" style="color:#FF8A80">🗑️</button>'+
+    '</div>';
+  }).join('');
+}
+function restablecerDemo(){
+  estado.rutas = EJEMPLOS.map(r=>({...r}));
+  estado.bajadas = EJEMPLOS_BAJADAS.map(b=>({...b}));
+  estado.frecuentes = EJEMPLOS_FREC.map(f=>({...f}));
+  estado.apps = APPS_DEF.map(a=>({...a}));
+  estado.bajadaFav = 'b1';
+  estado.dinero = { dia:'', monto:0 };
+  estado.clases = [];
+  guardar(); pintarTodo(); toast('Ejemplos restaurados 🔄');
+}
+function borrarTodo(){
+  estado.rutas = []; estado.bajadas = []; estado.gastos = [];
+  estado.notas = []; estado.viajes = []; estado.caminatas = []; estado.frecuentes = [];
+  estado.bajadaFav = null; estado.presupuesto = null;
+  estado.ahorro.registros = [];
+  estado.dinero = { dia:'', monto:0 };
+  estado.clases = [];
+  const pr = document.getElementById('prMonto');
+  if(pr) pr.value = '';
+  guardar(); pintarTodo(); toast('Todo borrado 🗑️');
+}
+
+/* ---------- Modo solo hora ---------- */
+function abrirModoHora(){
+  document.getElementById('modoHora').classList.add('show');
+  tickModoHora();
+}
+function cerrarModoHora(){ document.getElementById('modoHora').classList.remove('show'); }
+function tickModoHora(){
+  const d = new Date();
+  document.getElementById('mhHora').innerHTML =
+    String(d.getHours()).padStart(2,'0')+':<small>'+String(d.getMinutes()).padStart(2,'0')+'</small>';
+  document.getElementById('mhSeg').textContent = String(d.getSeconds()).padStart(2,'0');
+  document.getElementById('mhFecha').textContent =
+    d.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+  const mejor = proxBusGlobal();
+  let extra = '';
+  if(mejor){
+    extra = ' · sal de casa en '+Math.max(0, Math.round(mejor.p.enMin) - (mejor.r.caminar||0))+' min';
+  }
+  document.getElementById('mhProx').textContent = mejor
+    ? '🚌 '+mejor.r.nombre.split('·')[0].trim()+' en '+fmtCuenta(Math.max(0,Math.round(mejor.p.enMin)))+' min (sale '+mejor.p.hora+')'+extra
+    : '🚌 Sin horarios de bus';
+}
+
+/* ---------- Toast / reloj ---------- */
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function tick(){
+  if(document.getElementById('modoHora').classList.contains('show')) tickModoHora();
+  if(secActual === 'inicio'){
+    const d = new Date();
+    const m = d.getHours()*60 + d.getMinutes();
+    // solo repintar hero si cambió el minuto o hay countdown activo
+    if(m !== _lastTickMin || _heroCountdown){
+      _lastTickMin = m;
+      pintarHero(); pintarAviso();
+    }
+  }
+}
+let _lastTickMin = -1, _heroCountdown = false;
+function pintarTodo(){
+  const ph = document.getElementById('planHora');
+  if(!ph.value){
+    const d = new Date();
+    ph.value = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+  if(estado.presupuesto){
+    const pm = document.getElementById('prMonto');
+    const pp = document.getElementById('prPeriodo');
+    if(pm) pm.value = estado.presupuesto.monto;
+    if(pp) pp.value = estado.presupuesto.periodo || 'semana';
+  }
+  const zs = document.getElementById('zSalida');
+  if(zs) zs.value = estado.salida || '';
+  pintarHero(); pintarAviso(); pintarPlan(); pintarRutas(); pintarViajes(); pintarBitacora();
+  pintarBajadas(); pintarGastos(); pintarNotas(); pintarListaRutasEdit(); pintarFrecuentes();
+  pintarPresupuesto(); pintarUniversidad(); pintarDinero(); pintarTemas();
+}
+
+/* Salir del modo hora con Escape */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') cerrarModoHora();
+});
+
+cargar();
+aplicarTema();
+pintarTodo();
+tick();
+setInterval(tick, 1000);
+
+/* PWA: registrar service worker */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

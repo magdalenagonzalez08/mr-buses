@@ -1,0 +1,19 @@
+{
+  "name": "MR · Buses",
+  "short_name": "MR",
+  "description": "Buses Chiriquí",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#060D1A",
+  "theme_color": "#060D1A",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
