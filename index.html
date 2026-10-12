@@ -457,54 +457,54 @@
 
   /* Modo hora: reloj DIGITAL gigante en landscape (automático) */
   @media (orientation:landscape){
-    .modo-hora{
-      flex-direction:row;flex-wrap:wrap;gap:4px 14px;padding:8px 16px;
+    .modo-hora.show{
+      flex-direction:row;flex-wrap:wrap;gap:6px 18px;padding:10px 20px;
       justify-content:center;align-items:center;overflow:hidden
     }
-    .modo-hora .grande{
-      font-size:clamp(120px,50vh,400px);letter-spacing:-8px;line-height:.85;flex-shrink:0
+    .modo-hora.show .grande{
+      font-size:clamp(100px,50vh,350px);letter-spacing:-6px;line-height:.9;flex-shrink:0
     }
-    .modo-hora .grande small{font-size:.42em}
-    .modo-hora .seg{
-      font-size:clamp(24px,7vh,48px);font-weight:800;color:var(--blue2);
-      align-self:flex-start;margin-top:4px
+    .modo-hora.show .grande small{font-size:.4em}
+    .modo-hora.show .seg{
+      font-size:clamp(20px,6vh,40px);font-weight:800;color:var(--blue2);
+      align-self:flex-start;margin-top:8px
     }
-    .modo-hora .sub{
-      font-size:clamp(13px,3.5vh,22px);font-weight:700;padding:0;max-width:42vw;
-      line-height:1.1;text-align:left
+    .modo-hora.show .sub{
+      font-size:clamp(12px,3vh,20px);font-weight:700;padding:0;max-width:42vw;
+      line-height:1.2;text-align:left
     }
-    .modo-hora .prox-bus{
-      padding:6px 14px;font-size:clamp(13px,3.5vh,22px);font-weight:800;
+    .modo-hora.show .prox-bus{
+      padding:6px 14px;font-size:clamp(12px,3vh,20px);font-weight:800;
       margin-top:0;max-width:92vw;background:var(--glass);border:1px solid var(--border);
       border-radius:999px;backdrop-filter:blur(12px);text-align:center
     }
-    .modo-hora .salir-hint{display:none}
-    .modo-hora .mh-close{top:4px;right:4px;width:28px;height:28px;font-size:12px}
+    .modo-hora.show .salir-hint{display:none}
+    .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
   }
   /* Modo hora forzado horizontal: idem landscape */
-  html[data-hora="horizontal"] .modo-hora{
-    flex-direction:row;flex-wrap:wrap;gap:4px 14px;padding:8px 16px;
+  html[data-hora="horizontal"] .modo-hora.show{
+    flex-direction:row;flex-wrap:wrap;gap:6px 18px;padding:10px 20px;
     justify-content:center;align-items:center;overflow:hidden
   }
-  html[data-hora="horizontal"] .modo-hora .grande{
-    font-size:clamp(120px,50vh,400px);letter-spacing:-8px;line-height:.85;flex-shrink:0
+  html[data-hora="horizontal"] .modo-hora.show .grande{
+    font-size:clamp(100px,50vh,350px);letter-spacing:-6px;line-height:.9;flex-shrink:0
   }
-  html[data-hora="horizontal"] .modo-hora .grande small{font-size:.42em}
-  html[data-hora="horizontal"] .modo-hora .seg{
-    font-size:clamp(24px,7vh,48px);font-weight:800;color:var(--blue2);
-    align-self:flex-start;margin-top:4px
+  html[data-hora="horizontal"] .modo-hora.show .grande small{font-size:.4em}
+  html[data-hora="horizontal"] .modo-hora.show .seg{
+    font-size:clamp(20px,6vh,40px);font-weight:800;color:var(--blue2);
+    align-self:flex-start;margin-top:8px
   }
-  html[data-hora="horizontal"] .modo-hora .sub{
-    font-size:clamp(13px,3.5vh,22px);font-weight:700;padding:0;max-width:42vw;
-    line-height:1.1;text-align:left
+  html[data-hora="horizontal"] .modo-hora.show .sub{
+    font-size:clamp(12px,3vh,20px);font-weight:700;padding:0;max-width:42vw;
+    line-height:1.2;text-align:left
   }
-  html[data-hora="horizontal"] .modo-hora .prox-bus{
-    padding:6px 14px;font-size:clamp(13px,3.5vh,22px);font-weight:800;
+  html[data-hora="horizontal"] .modo-hora.show .prox-bus{
+    padding:6px 14px;font-size:clamp(12px,3vh,20px);font-weight:800;
     margin-top:0;max-width:92vw;background:var(--glass);border:1px solid var(--border);
     border-radius:999px;backdrop-filter:blur(12px);text-align:center
   }
-  html[data-hora="horizontal"] .modo-hora .salir-hint{display:none}
-  html[data-hora="horizontal"] .modo-hora .mh-close{top:4px;right:4px;width:28px;height:28px;font-size:12px}
+  html[data-hora="horizontal"] .modo-hora.show .salir-hint{display:none}
+  html[data-hora="horizontal"] .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
 
   /* Bitácora */
   #bitacoraHoy{line-height:1.5}
