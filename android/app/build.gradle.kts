@@ -11,8 +11,8 @@ android {
         applicationId = "com.mr.buses"
         minSdk = 29
         targetSdk = 34
-        versionCode = 8
-        versionName = "4.4"
+        versionCode = 9
+        versionName = "4.5"
     }
 
     buildTypes {
