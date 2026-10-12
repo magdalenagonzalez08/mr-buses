@@ -458,50 +458,54 @@
   /* Modo hora: reloj DIGITAL gigante en landscape (automático) */
   @media (orientation:landscape){
     .modo-hora.show{
-      flex-direction:row;flex-wrap:wrap;gap:6px 18px;padding:10px 20px;
+      flex-direction:row;flex-wrap:nowrap;gap:12px 24px;padding:10px 24px;
       justify-content:center;align-items:center;overflow:hidden
     }
     .modo-hora.show .grande{
-      font-size:clamp(100px,50vh,350px);letter-spacing:-6px;line-height:.9;flex-shrink:0
+      font-size:clamp(80px,min(50vh,30vw),300px);letter-spacing:-6px;line-height:.9;
+      flex:0 0 auto
     }
     .modo-hora.show .grande small{font-size:.4em}
     .modo-hora.show .seg{
-      font-size:clamp(20px,6vh,40px);font-weight:800;color:var(--blue2);
-      align-self:flex-start;margin-top:8px
+      font-size:clamp(16px,4vh,32px);font-weight:800;color:var(--blue2);
+      align-self:center;margin-top:0;flex:0 0 auto
     }
     .modo-hora.show .sub{
-      font-size:clamp(12px,3vh,20px);font-weight:700;padding:0;max-width:42vw;
-      line-height:1.2;text-align:left
+      font-size:clamp(11px,2.5vh,18px);font-weight:700;padding:0;max-width:35vw;
+      line-height:1.2;text-align:left;flex:1;min-width:0;overflow:hidden
     }
     .modo-hora.show .prox-bus{
-      padding:6px 14px;font-size:clamp(12px,3vh,20px);font-weight:800;
-      margin-top:0;max-width:92vw;background:var(--glass);border:1px solid var(--border);
-      border-radius:999px;backdrop-filter:blur(12px);text-align:center
+      padding:6px 14px;font-size:clamp(11px,2.5vh,18px);font-weight:800;
+      margin-top:0;max-width:35vw;background:var(--glass);border:1px solid var(--border);
+      border-radius:999px;backdrop-filter:blur(12px);text-align:center;
+      flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
     }
     .modo-hora.show .salir-hint{display:none}
     .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
   }
   /* Modo hora forzado horizontal: idem landscape */
   html[data-hora="horizontal"] .modo-hora.show{
-    flex-direction:row;flex-wrap:wrap;gap:6px 18px;padding:10px 20px;
+    flex-direction:row;flex-wrap:nowrap;gap:12px 24px;padding:10px 24px;
     justify-content:center;align-items:center;overflow:hidden
   }
   html[data-hora="horizontal"] .modo-hora.show .grande{
-    font-size:clamp(100px,50vh,350px);letter-spacing:-6px;line-height:.9;flex-shrink:0
+    font-size:clamp(80px,min(50vh,30vw),300px);letter-spacing:-6px;line-height:.9;
+    flex:0 0 auto
   }
   html[data-hora="horizontal"] .modo-hora.show .grande small{font-size:.4em}
   html[data-hora="horizontal"] .modo-hora.show .seg{
-    font-size:clamp(20px,6vh,40px);font-weight:800;color:var(--blue2);
-    align-self:flex-start;margin-top:8px
+    font-size:clamp(16px,4vh,32px);font-weight:800;color:var(--blue2);
+    align-self:center;margin-top:0;flex:0 0 auto
   }
   html[data-hora="horizontal"] .modo-hora.show .sub{
-    font-size:clamp(12px,3vh,20px);font-weight:700;padding:0;max-width:42vw;
-    line-height:1.2;text-align:left
+    font-size:clamp(11px,2.5vh,18px);font-weight:700;padding:0;max-width:35vw;
+    line-height:1.2;text-align:left;flex:1;min-width:0;overflow:hidden
   }
   html[data-hora="horizontal"] .modo-hora.show .prox-bus{
-    padding:6px 14px;font-size:clamp(12px,3vh,20px);font-weight:800;
-    margin-top:0;max-width:92vw;background:var(--glass);border:1px solid var(--border);
-    border-radius:999px;backdrop-filter:blur(12px);text-align:center
+    padding:6px 14px;font-size:clamp(11px,2.5vh,18px);font-weight:800;
+    margin-top:0;max-width:35vw;background:var(--glass);border:1px solid var(--border);
+    border-radius:999px;backdrop-filter:blur(12px);text-align:center;
+    flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
   }
   html[data-hora="horizontal"] .modo-hora.show .salir-hint{display:none}
   html[data-hora="horizontal"] .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
