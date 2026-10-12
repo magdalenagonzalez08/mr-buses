@@ -677,7 +677,7 @@
   </div>
 
   <!-- Snackbar -->
-  <div id="snackG" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:160;background:var(--bg2,#1E293B);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700">
+  <div id="snackG" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:160;background:var(--bg2,#1E293B);border:1px solid var(--border);border-radius:12px;padding:10px 16px;gap:10px;align-items:center;font-size:13px;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.3)">
     <span id="snackGtxt"></span>
     <button class="btn small ghost" onclick="deshacerG()" style="color:var(--blue2)">Deshacer</button>
   </div>
@@ -791,7 +791,7 @@
       </a>
     </div>
     <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
-      MR v2.0 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
+      MR v3.0 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
     </div>
   </section>
 </div>
@@ -966,7 +966,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY = 'miruta_v2';
+const KEY = 'miruta_v3';
 const DIAS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -1030,7 +1030,8 @@ let editandoBjId = null;
 function cargar(){
   try{
     let raw = localStorage.getItem(KEY);
-    // Migración desde v9
+    // Migración desde versiones anteriores
+    if(!raw){ raw = localStorage.getItem('miruta_v2'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v9'); if(raw) localStorage.setItem(KEY, raw); }
     if(raw){ estado = Object.assign(estado, JSON.parse(raw)); }
   }catch(e){}
@@ -2271,7 +2272,12 @@ function mostrarSnackG(txt){
   clearTimeout(snackTimer);
   snackTimer=setTimeout(ocultarSnackG,5000);
 }
-function ocultarSnackG(){document.getElementById('snackG').style.display='none';undoG=null;}
+function ocultarSnackG(){
+  const el=document.getElementById('snackG');
+  if(el) el.style.display='none';
+  clearTimeout(snackTimer);
+  undoG=null;
+}
 
 function abrirModalG(){
   editGId=null;
