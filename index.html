@@ -1300,7 +1300,7 @@ function proximaSalida(ruta, desdeMin){
     let t = aMin(hh);
     let delta = t - ah;
     if(delta < -0.5) delta += 1440;
-    if(mejor === null || delta < mejor.enMin) mejor = { enMin: delta, hora: hh, t: t };
+    if(mejor === null || delta < mejor.enMin) mejor = { enMin: Math.round(delta), hora: hh, t: t };
   });
   return mejor;
 }
@@ -1318,8 +1318,11 @@ function icono(t){ return t==='bus' ? '🚌' : t==='taxi' ? '🚕' : t==='uber' 
 function nombreTipo(t){ return t==='bus' ? 'Bus' : t==='taxi' ? 'Taxi' : t==='uber' ? 'Uber' : t==='indriver' ? 'inDriver' : 'A pie'; }
 function zona(){ return estado.salida || 'mi casa'; }
 function fmtCuenta(min){
-  if(min >= 60){ const h = Math.floor(min/60), m = min%60; return h+'h '+String(m).padStart(2,'0'); }
-  return String(min).padStart(min >= 10 ? 1 : 2, '0');
+  min = Math.round(min);
+  if(min <= 0) return 'ahora';
+  if(min < 60) return min + ' min';
+  const h = Math.floor(min/60), m = min%60;
+  return m > 0 ? h + 'h ' + m + 'min' : h + 'h';
 }
 function colorEmpresa(e){ return EMPRESAS_COL[e] || EMPRESAS_COL['Otra']; }
 function expandirHorarios(desde, hasta, cada){
@@ -2825,10 +2828,12 @@ function toast(msg){
 }
 function tick(){
   if(document.getElementById('modoHora').classList.contains('show')) tickModoHora();
-  if(secActual === 'inicio'){
-    const d = new Date();
-    const m = d.getHours()*60 + d.getMinutes();
-    if(m !== _lastTickMin || _heroCountdown){
+  const ahora = new Date();
+  const m = ahora.getHours()*60 + ahora.getMinutes();
+  const s = ahora.getSeconds();
+  // Actualizar cada 15 segundos para que la cuenta regresiva se mueva
+  if(s % 15 === 0 || _heroCountdown){
+    if(m !== _lastTickMin || _heroCountdown || s % 15 === 0){
       _lastTickMin = m;
       pintarHero(); pintarAviso(); pintarProximamente();
       revisarNotificaciones();
@@ -2944,21 +2949,23 @@ function pintarProximamente(){
   if(clasesHoy.length){
     const c = clasesHoy[0];
     const color = c.enMin <= 15 ? '#FF6B6B' : c.enMin <= 30 ? '#FF9F0A' : '#30D158';
+    const txtClase = c.enMin <= 1 ? '¡Ahora!' : c.enMin <= 0 ? 'En curso' : 'en ' + fmtCuenta(c.enMin);
     html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border-left:3px solid '+color+';margin-bottom:6px">'+
       '<span style="font-size:18px">📚</span>'+
       '<div style="flex:1"><div style="font-size:12px;font-weight:800">'+esc(c.nombre)+'</div>'+
       '<div style="font-size:10px;color:var(--muted);font-weight:600">Clase a las '+c.hora+'</div></div>'+
-      '<div style="font-size:11px;font-weight:900;color:'+color+'">'+(c.enMin<=0?'AHORA':'en '+fmtCuenta(c.enMin))+'</div></div>';
+      '<div style="font-size:11px;font-weight:900;color:'+color+';white-space:nowrap">'+txtClase+'</div></div>';
   }
 
   // Próximos buses (top 3)
   items.slice(0,3).forEach(b=>{
     const color = b.enMin <= 5 ? '#FF6B6B' : b.enMin <= 15 ? '#FF9F0A' : '#30D158';
+    const txtTiempo = b.enMin <= 1 ? '¡Ya viene!' : 'en ' + fmtCuenta(b.enMin);
     html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border-left:3px solid '+color+';margin-bottom:6px">'+
       '<span style="font-size:18px">🚌</span>'+
       '<div style="flex:1"><div style="font-size:12px;font-weight:800">'+esc(b.nombre)+'</div>'+
       '<div style="font-size:10px;color:var(--muted);font-weight:600">Sale a las '+b.hora+(b.empresa?' · '+esc(b.empresa):'')+'</div></div>'+
-      '<div style="font-size:11px;font-weight:900;color:'+color+'">en '+fmtCuenta(b.enMin)+'</div></div>';
+      '<div style="font-size:11px;font-weight:900;color:'+color+';white-space:nowrap">'+txtTiempo+'</div></div>';
   });
 
   if(!html){
