@@ -318,7 +318,8 @@
     position:fixed;bottom:108px;left:50%;transform:translateX(-50%) translateY(80px);
     background:linear-gradient(135deg,#0E2A52,#0A1F3D);border:1px solid rgba(255,255,255,.12);color:#EAF2FF;
     padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;
-    transition:.35s cubic-bezier(.2,.9,.3,1);box-shadow:0 12px 32px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis
+    transition:.35s cubic-bezier(.2,.9,.3,1);box-shadow:0 12px 32px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+    pointer-events:auto;cursor:pointer
   }
   .toast.show{transform:translateX(-50%) translateY(0)}
 
@@ -442,7 +443,8 @@
   .presu-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ok),#7CE495);width:0;transition:width 1s cubic-bezier(.3,1.2,.4,1)}
   .presu-fill.warn{background:linear-gradient(90deg,var(--warn),#FFC46B)}
   .presu-fill.over{background:linear-gradient(90deg,var(--danger),#FF8A80)}
-  .presu-txt{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .presu-txt{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;overflow:hidden}
+  .presu-txt span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .presu-txt .q{color:var(--muted)}
   .hero-origen{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:3px;position:relative;z-index:1}
   .app-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);min-width:0;overflow:hidden}
@@ -465,13 +467,30 @@
     .modo-hora .grande small{font-size:.28em}
   }
   /* Modo hora forzado horizontal */
-  html[data-hora="horizontal"] .modo-hora{flex-direction:row;flex-wrap:wrap;gap:6px 14px;padding:10px 16px;justify-content:center;align-items:center}
-  html[data-hora="horizontal"] .modo-hora .grande{font-size:clamp(36px,12vh,56px)}
-  html[data-hora="horizontal"] .modo-hora .seg{font-size:12px;margin-top:0}
-  html[data-hora="horizontal"] .modo-hora .sub{font-size:10px;padding:0;max-width:40vw;line-height:1.2}
-  html[data-hora="horizontal"] .modo-hora .prox-bus{padding:5px 12px;font-size:10px;max-width:40vw}
+  /* Modo hora forzado horizontal: pantalla completa, reloj grande */
+  html[data-hora="horizontal"] .modo-hora{
+    flex-direction:row;flex-wrap:wrap;gap:8px 20px;padding:16px 20px;
+    justify-content:center;align-items:center;overflow:hidden
+  }
+  html[data-hora="horizontal"] .modo-hora .grande{
+    font-size:clamp(72px,22vw,140px);letter-spacing:-3px;flex-shrink:0
+  }
+  html[data-hora="horizontal"] .modo-hora .grande small{font-size:.38em}
+  html[data-hora="horizontal"] .modo-hora .seg{
+    font-size:20px;font-weight:800;color:var(--blue2);align-self:flex-start;margin-top:8px
+  }
+  html[data-hora="horizontal"] .modo-hora .sub{
+    font-size:14px;font-weight:700;padding:0;max-width:45vw;line-height:1.3;text-align:left
+  }
+  html[data-hora="horizontal"] .modo-hora .prox-bus{
+    padding:10px 20px;font-size:15px;font-weight:800;margin-top:0;max-width:90vw;
+    background:var(--glass);border:1px solid var(--border);border-radius:999px;
+    backdrop-filter:blur(12px);text-align:center
+  }
   html[data-hora="horizontal"] .modo-hora .salir-hint{display:none}
-  html[data-hora="horizontal"] .modo-hora .mh-close{top:4px;right:4px;width:28px;height:28px;font-size:12px}
+  html[data-hora="horizontal"] .modo-hora .mh-close{
+    top:8px;right:8px;width:36px;height:36px;font-size:14px
+  }
 
   /* Bitácora */
   #bitacoraHoy{line-height:1.5}
@@ -1503,24 +1522,20 @@ function pintarAhorro(){
     '<div class="presu-bar"><div class="presu-fill '+nivel+'" id="ahFill" style="width:0%"></div></div>'+
     '<div class="presu-txt"><span>$'+fmtNum(total)+' / $'+fmtNum(meta)+'</span><span class="q">'+pct+'%</span></div>'+
     '<div class="section-title" style="margin:12px 0 6px">Registrar ahorro</div>'+
-    '<div style="display:flex;gap:6px">'+
-      '<input type="number" id="ahMonto" step="0.05" min="0" max="9999" placeholder="$0.00" inputmode="decimal" style="width:92px">'+
-      '<input type="text" id="ahNota" placeholder="Nota: caminé, me sobró..." maxlength="80" style="flex:1;min-width:0">'+
-      '<button class="btn" style="flex:0 0 auto;padding:10px 14px" onclick="guardarAhorro()">＋</button>'+
-    '</div>'+
-    '<div class="section-title" style="margin:12px 0 6px">Meta del mes</div>'+
-    '<div style="display:flex;gap:6px">'+
-      '<input type="number" id="ahMeta" step="0.50" min="0" max="9999" placeholder="$0.00" inputmode="decimal" value="'+(meta||'')+'" style="flex:1">'+
-      '<button class="btn ghost" style="flex:0 0 auto" onclick="guardarMetaAhorro()">🎯 Guardar</button>'+
-    '</div>'+
+    '<input type="number" id="ahMonto" step="0.05" min="0" max="9999" placeholder="¿Cuánto ahorraste? $" inputmode="decimal" style="margin-bottom:6px">'+
+    '<input type="text" id="ahNota" placeholder="Nota: caminé, me sobró..." maxlength="80" style="margin-bottom:8px">'+
+    '<button class="btn full" onclick="guardarAhorro()">＋ Guardar ahorro</button>'+
+    '<div class="section-title" style="margin:14px 0 6px">Meta del mes</div>'+
+    '<input type="number" id="ahMeta" step="0.50" min="0" max="9999" placeholder="¿Cuánto quieres ahorrar? $" inputmode="decimal" value="'+(meta||'')+'" style="margin-bottom:8px">'+
+    '<button class="btn ghost full" onclick="guardarMetaAhorro()">🎯 Guardar meta</button>'+
     (regs.length
       ? '<div class="section-title" style="margin:14px 0 4px">Últimos ahorros</div>'+regs.map(r=>{
           const esHoy = r.fecha === hoyFecha();
           const fecha = esHoy ? 'Hoy' : r.fecha;
-          return '<div class="app-row"><span class="app-ico">🐷</span><span class="app-nombre">'+esc(r.nota||'Ahorro')+
+          return '<div class="app-row"><span class="app-ico" style="flex-shrink:0">🐷</span><span class="app-nombre" style="flex:1;min-width:0;overflow:hidden">'+esc(r.nota||'Ahorro')+
           '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+fecha+'</div></span>'+
-          '<span style="font-weight:850;font-size:13px;color:var(--ok)">+$'+fmtNum(r.monto)+'</span>'+
-          '<button class="btn small ghost" onclick="borrarAhorro(\''+r.id+'\')" style="padding:2px 7px;color:#FF8A80;font-size:11px" title="Borrar">✕</button></div>';
+          '<span style="font-weight:850;font-size:13px;color:var(--ok);white-space:nowrap;flex-shrink:0">+$'+fmtNum(r.monto)+'</span>'+
+          '<button class="btn small ghost" onclick="borrarAhorro(\''+r.id+'\')" style="padding:2px 7px;color:#FF8A80;font-size:11px;flex-shrink:0" title="Borrar">✕</button></div>';
         }).join('')
       : '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;line-height:1.5">Sin ahorros. Ej: caminaste en vez del bus, o te sobró del pasaje.</div>');
   requestAnimationFrame(()=>{ const f=document.getElementById('ahFill'); if(f) f.style.width=pct+'%'; });
@@ -2981,7 +2996,10 @@ function tickModoHora(){
   const mejor = proxBusGlobal();
   let extra = '';
   if(mejor){
-    extra = ' · sal de casa en '+Math.max(0, Math.round(mejor.p.enMin) - (mejor.r.caminar||0))+' min';
+    const enMin = Math.max(0, Math.round(mejor.p.enMin));
+    const caminar = mejor.r.caminar || 0;
+    const salirEn = Math.max(0, enMin - caminar);
+    extra = ' · 🚶 sal de casa en '+salirEn+' min';
   }
   document.getElementById('mhProx').textContent = mejor
     ? '🚌 '+mejor.r.nombre.split('·')[0].trim()+' en '+fmtCuenta(Math.max(0,Math.round(mejor.p.enMin)))+' min (sale '+mejor.p.hora+')'+extra
@@ -2992,10 +3010,13 @@ function tickModoHora(){
 let toastT;
 function toast(msg){
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastT);
   toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+  // Cerrar al tocar
+  t.onclick = ()=>{ t.classList.remove('show'); clearTimeout(toastT); };
 }
 function tick(){
   if(document.getElementById('modoHora').classList.contains('show')) tickModoHora();
