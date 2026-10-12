@@ -15,10 +15,20 @@ android {
         versionName = "4.5"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("mr-buses.keystore")
+            storePassword = "mrbuses2026"
+            keyAlias = "mrbuses"
+            keyPassword = "mrbuses2026"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
