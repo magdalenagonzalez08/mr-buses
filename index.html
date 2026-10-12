@@ -430,18 +430,26 @@
   .app-nombre{flex:1;font-size:13.5px;font-weight:700;min-width:0}
   .app-row input{width:88px;text-align:right;flex:0 0 auto}
   .ahorro-ok{color:var(--ok)}
-  .mh-close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:5;backdrop-filter:blur(8px);transition:.2s}
-  .mh-close:active{transform:scale(.92)}
+  .mh-close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:5}
 
-  @media (orientation:landscape) and (max-height:520px){
-    .modo-hora{gap:4px;padding:10px 16px;justify-content:center;flex-direction:row;flex-wrap:wrap}
-    .modo-hora .grande{font-size:clamp(52px,18vh,90px)}
-    .modo-hora .seg{font-size:14px;margin-top:0}
-    .modo-hora .sub{font-size:11px;padding:0 12px;max-width:45vw}
-    .modo-hora .prox-bus{padding:6px 14px;font-size:11px;margin-top:0;max-width:45vw}
+  /* Modo hora horizontal - SIEMPRE en landscape */
+  @media (orientation:landscape){
+    .modo-hora{flex-direction:row;flex-wrap:wrap;gap:8px 16px;padding:12px 20px;justify-content:center;align-items:center}
+    .modo-hora .grande{font-size:clamp(48px,16vh,80px)}
+    .modo-hora .seg{font-size:14px;margin-top:0;align-self:flex-start}
+    .modo-hora .sub{font-size:11px;padding:0;max-width:40vw;line-height:1.3}
+    .modo-hora .prox-bus{padding:6px 14px;font-size:11px;margin-top:0;max-width:40vw}
     .modo-hora .salir-hint{display:none}
-    .modo-hora .mh-close{top:8px;right:8px;width:36px;height:36px;font-size:14px}
+    .modo-hora .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
+    .modo-hora .grande small{font-size:.3em}
   }
+  /* Modo hora forzado horizontal */
+  html[data-hora="horizontal"] .modo-hora{flex-direction:row;flex-wrap:wrap;gap:8px 16px;padding:12px 20px;justify-content:center;align-items:center}
+  html[data-hora="horizontal"] .modo-hora .grande{font-size:clamp(48px,16vh,80px)}
+  html[data-hora="horizontal"] .modo-hora .seg{font-size:14px;margin-top:0}
+  html[data-hora="horizontal"] .modo-hora .sub{font-size:11px;padding:0;max-width:40vw}
+  html[data-hora="horizontal"] .modo-hora .prox-bus{padding:6px 14px;font-size:11px;max-width:40vw}
+  html[data-hora="horizontal"] .modo-hora .salir-hint{display:none}
 
   /* Bitácora */
   #bitacoraHoy{line-height:1.5}
@@ -479,6 +487,9 @@
       <div class="chip-salida" id="heroChip">--:--</div>
     </div>
     <div class="aviso-salida" id="avisoSalida"></div>
+
+    <!-- Universidad: próxima clase -->
+    <div class="card" id="uniContenido" style="margin-top:8px;display:none"></div>
 
     <!-- Próximamente (buses y clases) -->
     <div class="card" id="proximamenteCard" style="margin-top:8px;border-left:3px solid var(--blue)"></div>
@@ -704,6 +715,10 @@
         <button class="btn ghost" onclick="setTema('claro')">☀️ Claro</button>
       </div>
       <button class="btn ghost" style="margin-top:8px" onclick="abrirModoHora()">🕒 Modo solo hora</button>
+      <div class="hint" style="font-size:11px;color:var(--muted);font-weight:600;margin-top:8px">Reloj en horizontal para celular acostado:</div>
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn ghost" id="btnHoraH" onclick="toggleHoraHorizontal()">📱 Reloj horizontal</button>
+      </div>
       <div class="hint" style="font-size:11px;color:var(--muted);font-weight:600;margin-top:10px">¿Celular lento? Modo ligero = más fluido</div>
       <button class="btn ghost" style="margin-top:6px" id="btnLigero" onclick="toggleModoLigero()">⚡ Modo ligero</button>
     </div>
@@ -747,10 +762,12 @@
     </div>
     <div class="card">
       <div class="section-title" style="margin:0 0 10px">📤 Mis datos</div>
-      <button class="btn" onclick="exportarDatos()">📥 Descargar mis datos (.json)</button>
+      <button class="btn" onclick="exportarDatos()">📥 Descargar todo (.json)</button>
       <button class="btn ghost" style="margin-top:8px" onclick="document.getElementById('inpImportar').click()">📤 Importar datos</button>
       <input type="file" id="inpImportar" accept=".json" style="display:none" onchange="importarDatos(this)">
-      <div class="hint" style="margin-top:8px">El archivo .json tiene tus rutas, viajes, gastos, clases y todo. Guárdalo por si borras el navegador.</div>
+      <div class="hint" style="margin-top:8px">El archivo .json tiene tus rutas, viajes, gastos, clases y todo.</div>
+      <button class="btn ghost" style="margin-top:8px" onclick="exportarCSVG()">📊 Exportar gastos (.csv)</button>
+      <div class="hint" style="margin-top:4px">Para Excel o Google Sheets.</div>
     </div>
     <div class="card">
       <div class="section-title" style="margin:0 0 10px">Datos</div>
@@ -800,7 +817,7 @@
       </a>
     </div>
     <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
-      MR v3.1 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
+      MR v4.0 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
     </div>
   </section>
 </div>
@@ -975,7 +992,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY = 'miruta_v31';
+const KEY = 'miruta_v40';
 const DIAS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -1029,7 +1046,7 @@ const APPS_DEF = [
   { nombre:'inDriver Terminal→UTP', icono:'🚗', costo:3.00 }
 ];
 
-let estado = { rutas:[], bajadas:[], gastos:[], notas:[], viajes:[], caminatas:[], frecuentes:[], presupuesto:null, tema:'oscuro', acento:'azul', bajadaFav:null, salida:'Dolega', apps:[], ahorro:{ meta:0, registros:[] }, dinero:{ dia:'', monto:0 }, clases:[], notifActivo:false, modoLigero:false };
+let estado = { rutas:[], bajadas:[], gastos:[], notas:[], viajes:[], caminatas:[], frecuentes:[], presupuesto:null, tema:'oscuro', acento:'azul', bajadaFav:null, salida:'Dolega', apps:[], ahorro:{ meta:0, registros:[] }, dinero:{ dia:'', monto:0 }, clases:[], notifActivo:false, modoLigero:false, horaHorizontal:false };
 let filtro = 'todos';
 let secActual = 'inicio';
 let editandoId = null;
@@ -1040,6 +1057,7 @@ function cargar(){
   try{
     let raw = localStorage.getItem(KEY);
     // Migración desde versiones anteriores
+    if(!raw){ raw = localStorage.getItem('miruta_v31'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v3'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v2'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v9'); if(raw) localStorage.setItem(KEY, raw); }
@@ -1180,10 +1198,13 @@ function guardar(){ invalidarCache(); _opsCache.clear(); try{ localStorage.setIt
 function aplicarTema(){
   document.documentElement.setAttribute('data-tema', estado.tema === 'claro' ? 'claro' : 'oscuro');
   document.documentElement.setAttribute('data-modo', estado.modoLigero ? 'ligero' : 'normal');
+  document.documentElement.setAttribute('data-hora', estado.horaHorizontal ? 'horizontal' : 'normal');
   const btnT = document.getElementById('btnTema');
   if(btnT) btnT.textContent = estado.tema === 'claro' ? '☀️' : '🌙';
   const btnL = document.getElementById('btnLigero');
   if(btnL) btnL.textContent = estado.modoLigero ? '⚡ Modo ligero: ON' : '⚡ Modo ligero';
+  const btnH = document.getElementById('btnHoraH');
+  if(btnH) btnH.textContent = estado.horaHorizontal ? '📱 Reloj horizontal: ON' : '📱 Reloj horizontal';
   if(estado.acento){
     const t = TEMAS_ACCENTO.find(x=>x.id===estado.acento);
     if(t){
@@ -1198,6 +1219,11 @@ function toggleModoLigero(){
   estado.modoLigero = !estado.modoLigero;
   aplicarTema(); guardar();
   toast(estado.modoLigero ? '⚡ Modo ligero activado' : '🌙 Modo normal activado');
+}
+function toggleHoraHorizontal(){
+  estado.horaHorizontal = !estado.horaHorizontal;
+  aplicarTema(); guardar();
+  toast(estado.horaHorizontal ? '📱 Reloj en horizontal' : '📱 Reloj en vertical');
 }
 
 /* ---------- Color de acento ---------- */
@@ -1446,35 +1472,53 @@ function pintarAhorro(){
   const meta = Number(estado.ahorro.meta)||0;
   const total = totalAhorroMes();
   const pct = meta > 0 ? Math.min(100, Math.round(total/meta*100)) : 0;
-  const regs = (estado.ahorro.registros||[]).slice(0,5);
+  const regs = (estado.ahorro.registros||[]).slice(0,8);
+  const quedan = Math.max(0, meta - total);
+  const diasRest = diasRestantesPeriodo('mes');
+  const alDia = diasRest > 0 ? Math.floor(quedan / diasRest * 100) / 100 : 0;
+  const nivel = pct >= 100 ? 'over' : pct >= 75 ? 'warn' : '';
   cont.innerHTML =
-    '<div class="presu-bar"><div class="presu-fill" style="width:'+pct+'%"></div></div>'+
-    '<div class="presu-txt"><span>$'+fmtNum(total)+' este mes</span><span class="q">meta $'+fmtNum(meta||0)+'</span></div>'+
-    '<div style="display:flex;gap:8px;margin-top:10px">'+
-      '<input type="number" id="ahMonto" step="0.05" min="0" placeholder="Monto $">'+
-      '<input type="text" id="ahNota" placeholder="Nota (ej: caminé)" style="flex:1;min-width:0">'+
-      '<button class="btn" style="flex:0 0 auto;padding:10px 12px" onclick="guardarAhorro()">＋</button>'+
+    '<div class="presu-bar"><div class="presu-fill '+nivel+'" id="ahFill" style="width:0%"></div></div>'+
+    '<div class="presu-txt"><span>$'+fmtNum(total)+' / $'+fmtNum(meta)+'</span><span class="q">'+pct+'%</span></div>'+
+    '<div class="section-title" style="margin:12px 0 6px">Registrar ahorro</div>'+
+    '<div style="display:flex;gap:6px">'+
+      '<input type="number" id="ahMonto" step="0.05" min="0" max="9999" placeholder="$0.00" inputmode="decimal" style="width:92px">'+
+      '<input type="text" id="ahNota" placeholder="Nota: caminé, me sobró..." maxlength="80" style="flex:1;min-width:0">'+
+      '<button class="btn" style="flex:0 0 auto;padding:10px 14px" onclick="guardarAhorro()">＋</button>'+
     '</div>'+
-    '<div style="display:flex;gap:8px;margin-top:8px;align-items:center">'+
-      '<input type="number" id="ahMeta" step="0.50" min="0" placeholder="Meta del mes $" value="'+(meta||'')+'" style="flex:1">'+
-      '<button class="btn ghost" style="flex:0 0 auto" onclick="guardarMetaAhorro()">Meta 🎯</button>'+
+    '<div class="section-title" style="margin:12px 0 6px">Meta del mes</div>'+
+    '<div style="display:flex;gap:6px">'+
+      '<input type="number" id="ahMeta" step="0.50" min="0" max="9999" placeholder="$0.00" inputmode="decimal" value="'+(meta||'')+'" style="flex:1">'+
+      '<button class="btn ghost" style="flex:0 0 auto" onclick="guardarMetaAhorro()">🎯 Guardar</button>'+
     '</div>'+
     (regs.length
-      ? '<div class="section-title" style="margin:14px 0 4px">Últimos ahorros</div>'+regs.map(r=>
-          '<div class="app-row"><span class="app-ico">🐷</span><span class="app-nombre">'+esc(r.nota||'Ahorro')+
-          '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+r.fecha+'</div></span>'+
-          '<span style="font-weight:850;font-size:13px" class="ahorro-ok">+$'+fmtNum(r.monto)+'</span></div>').join('')
-      : '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;line-height:1.5">Sin ahorros registrados. Ej: caminaste en vez de tomar el bus, o te sobrió del pasaje.</div>');
+      ? '<div class="section-title" style="margin:14px 0 4px">Últimos ahorros</div>'+regs.map(r=>{
+          const esHoy = r.fecha === hoyFecha();
+          const fecha = esHoy ? 'Hoy' : r.fecha;
+          return '<div class="app-row"><span class="app-ico">🐷</span><span class="app-nombre">'+esc(r.nota||'Ahorro')+
+          '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+fecha+'</div></span>'+
+          '<span style="font-weight:850;font-size:13px;color:var(--ok)">+$'+fmtNum(r.monto)+'</span>'+
+          '<button class="btn small ghost" onclick="borrarAhorro(\''+r.id+'\')" style="padding:2px 7px;color:#FF8A80;font-size:11px" title="Borrar">✕</button></div>';
+        }).join('')
+      : '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;line-height:1.5">Sin ahorros. Ej: caminaste en vez del bus, o te sobró del pasaje.</div>');
+  requestAnimationFrame(()=>{ const f=document.getElementById('ahFill'); if(f) f.style.width=pct+'%'; });
 }
 function guardarAhorro(){
-  const monto = parseFloat(document.getElementById('ahMonto').value);
+  const inp = document.getElementById('ahMonto');
+  const monto = Math.round(parseFloat(inp.value)*100)/100;
   if(isNaN(monto) || monto <= 0){ toast('Pon un monto válido 🐷'); return; }
+  if(monto > 9999){ toast('Monto máximo $9,999 🐷'); return; }
   estado.ahorro.registros.unshift({
     id:'a'+Date.now(), fecha: hoyFecha(), monto,
-    nota: document.getElementById('ahNota').value.trim()
+    nota: (document.getElementById('ahNota').value||'').trim().slice(0,80)
   });
   guardar(); pintarAhorro();
   toast('¡Ahorraste $'+fmtNum(monto)+'! 🐷');
+}
+function borrarAhorro(id){
+  estado.ahorro.registros = (estado.ahorro.registros||[]).filter(r=>r.id!==id);
+  guardar(); pintarAhorro();
+  toast('Ahorro borrado 🗑️');
 }
 function guardarMetaAhorro(){
   const monto = parseFloat(document.getElementById('ahMeta').value);
@@ -2209,17 +2253,19 @@ function setPeriodoG(btn,p){
   btn.classList.add('on');
   pintarTodoG();
 }
-function setCatG(btn){document.querySelectorAll('#catGrid .tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');gCatSel=btn.dataset.cat;}
+function setCatG(btn){
+  document.querySelectorAll('#catGrid .tab, #mCatGrid .tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');gCatSel=btn.dataset.cat;
+}
 function setPagoG(p){
   gPagoSel=p;
-  document.getElementById('pagoEf').classList.toggle('on',p==='efectivo');
-  document.getElementById('pagoEf').classList.toggle('ef',p==='efectivo');
-  document.getElementById('pagoTj').classList.toggle('on',p==='tarjeta');
+  ['pagoEf','mPagoEf'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.toggle('on',p==='efectivo');el.classList.toggle('ef',p==='efectivo');}});
+  ['pagoTj','mPagoTj'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',p==='tarjeta');});
 }
 function setTipoG(t){
   gTipoSel=t;
-  document.getElementById('tipoEgreso').classList.toggle('on',t==='egreso');
-  document.getElementById('tipoIngreso').classList.toggle('on',t==='ingreso');
+  ['tipoEgreso','mTipoEgreso'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',t==='egreso');});
+  ['tipoIngreso','mTipoIngreso'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',t==='ingreso');});
 }
 function actualizarLblFechaG(){
   const f=document.getElementById('gFecha')?.value;
@@ -2262,12 +2308,39 @@ function editarGastoV2(id){
   const g=estado.gastos.find(x=>x.id===id);if(!g)return;
   editGId=id;
   document.getElementById('modalGastoTitle').textContent='Editar gasto';
+  document.getElementById('modalGastoBody').innerHTML=
+    '<div style="display:flex;gap:6px;margin-bottom:8px">'+
+      '<button class="tab" id="mTipoEgreso" onclick="setTipoG(\'egreso\')">⬇ Egreso</button>'+
+      '<button class="tab" id="mTipoIngreso" onclick="setTipoG(\'ingreso\')">⬆ Ingreso</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;margin-bottom:8px">'+
+      '<button class="tab" id="mPagoEf" onclick="setPagoG(\'efectivo\')">💵 Efectivo</button>'+
+      '<button class="tab" id="mPagoTj" onclick="setPagoG(\'tarjeta\')">💳 Tarjeta</button>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px" id="mCatGrid">'+
+      '<button class="tab" data-cat="bus" onclick="setCatG(this)">🚌 Bus</button>'+
+      '<button class="tab" data-cat="taxi" onclick="setCatG(this)">🚕 Taxi</button>'+
+      '<button class="tab" data-cat="comida" onclick="setCatG(this)">🍳 Comida</button>'+
+      '<button class="tab" data-cat="tienda" onclick="setCatG(this)">🏪 Tienda</button>'+
+      '<button class="tab" data-cat="recarga" onclick="setCatG(this)">📱 Recarga</button>'+
+      '<button class="tab" data-cat="estudio" onclick="setCatG(this)">📚 Estudio</button>'+
+      '<button class="tab" data-cat="ropa" onclick="setCatG(this)">👕 Ropa</button>'+
+      '<button class="tab" data-cat="salud" onclick="setCatG(this)">💊 Salud</button>'+
+      '<button class="tab" data-cat="otro" onclick="setCatG(this)">💳 Otro</button>'+
+    '</div>'+
+    '<input type="number" id="mMonto" step="0.05" min="0" max="9999" placeholder="Monto $" style="margin-bottom:6px">'+
+    '<input type="text" id="mNota" placeholder="Nota opcional" maxlength="120" style="margin-bottom:6px">'+
+    '<label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">'+
+      '<input type="date" id="mFecha"> <span id="mLblFecha">📅 Hoy</span>'+
+    '</label>'+
+    '<button class="btn full" onclick="guardarGastoModal()">💾 Guardar</button>';
   setTipoG(g.tipo||'egreso');setPagoG(g.pago||'efectivo');
-  const cb=document.querySelector('#catGrid .tab[data-cat="'+g.cat+'"]');if(cb)setCatG(cb);
-  document.getElementById('gMonto').value=g.monto;
-  document.getElementById('gNota').value=g.nota||'';
-  document.getElementById('gFecha').value=g.fecha;
-  actualizarLblFechaG();
+  const cb=document.querySelector('#mCatGrid .tab[data-cat="'+g.cat+'"]');if(cb)setCatG(cb);
+  document.getElementById('mMonto').value=g.monto;
+  document.getElementById('mNota').value=g.nota||'';
+  document.getElementById('mFecha').value=g.fecha;
+  document.getElementById('mFecha').addEventListener('change',actualizarLblFechaModal);
+  actualizarLblFechaModal();
   document.getElementById('modalGasto').style.display='flex';
 }
 
@@ -2301,13 +2374,63 @@ function ocultarSnackG(){
 function abrirModalG(){
   editGId=null;
   document.getElementById('modalGastoTitle').textContent='Nuevo gasto';
-  document.getElementById('gMonto').value='';
-  document.getElementById('gNota').value='';
-  document.getElementById('gFecha').value=gHoy();
+  document.getElementById('modalGastoBody').innerHTML=
+    '<div style="display:flex;gap:6px;margin-bottom:8px">'+
+      '<button class="tab on" id="mTipoEgreso" onclick="setTipoG(\'egreso\')">⬇ Egreso</button>'+
+      '<button class="tab" id="mTipoIngreso" onclick="setTipoG(\'ingreso\')">⬆ Ingreso</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;margin-bottom:8px">'+
+      '<button class="tab on ef" id="mPagoEf" onclick="setPagoG(\'efectivo\')">💵 Efectivo</button>'+
+      '<button class="tab" id="mPagoTj" onclick="setPagoG(\'tarjeta\')">💳 Tarjeta</button>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px" id="mCatGrid">'+
+      '<button class="tab on" data-cat="bus" onclick="setCatG(this)">🚌 Bus</button>'+
+      '<button class="tab" data-cat="taxi" onclick="setCatG(this)">🚕 Taxi</button>'+
+      '<button class="tab" data-cat="comida" onclick="setCatG(this)">🍳 Comida</button>'+
+      '<button class="tab" data-cat="tienda" onclick="setCatG(this)">🏪 Tienda</button>'+
+      '<button class="tab" data-cat="recarga" onclick="setCatG(this)">📱 Recarga</button>'+
+      '<button class="tab" data-cat="estudio" onclick="setCatG(this)">📚 Estudio</button>'+
+      '<button class="tab" data-cat="ropa" onclick="setCatG(this)">👕 Ropa</button>'+
+      '<button class="tab" data-cat="salud" onclick="setCatG(this)">💊 Salud</button>'+
+      '<button class="tab" data-cat="otro" onclick="setCatG(this)">💳 Otro</button>'+
+    '</div>'+
+    '<input type="number" id="mMonto" step="0.05" min="0" max="9999" placeholder="Monto $" style="margin-bottom:6px">'+
+    '<input type="text" id="mNota" placeholder="Nota opcional" maxlength="120" style="margin-bottom:6px">'+
+    '<label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">'+
+      '<input type="date" id="mFecha"> <span id="mLblFecha">📅 Hoy</span>'+
+    '</label>'+
+    '<button class="btn full" onclick="guardarGastoModal()">💾 Guardar</button>';
+  document.getElementById('mFecha').value=gHoy();
+  document.getElementById('mFecha').addEventListener('change',actualizarLblFechaModal);
   setTipoG('egreso');setPagoG('efectivo');
-  const cb=document.querySelector('#catGrid .tab[data-cat="bus"]');if(cb)setCatG(cb);
-  actualizarLblFechaG();
+  const cb=document.querySelector('#mCatGrid .tab[data-cat="bus"]');if(cb)setCatG(cb);
+  actualizarLblFechaModal();
   document.getElementById('modalGasto').style.display='flex';
+}
+function actualizarLblFechaModal(){
+  const f=document.getElementById('mFecha')?.value;
+  const lbl=document.getElementById('mLblFecha');
+  if(!f||!lbl)return;
+  if(f===gHoy())lbl.textContent='📅 Hoy';
+  else if(f===gAyer())lbl.textContent='📅 Ayer';
+  else{const d=new Date(f+'T12:00:00');const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];lbl.textContent='📅 '+dias[d.getDay()]+' '+d.getDate()+' '+meses[d.getMonth()];}
+}
+function guardarGastoModal(){
+  const monto=Math.round(parseFloat(document.getElementById('mMonto').value)*100)/100;
+  if(!monto||monto<=0||monto>9999){toast('Pon un monto válido 💸');return;}
+  const nota=(document.getElementById('mNota').value||'').trim().slice(0,120);
+  const fecha=document.getElementById('mFecha').value||gHoy();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){toast('Fecha inválida');return;}
+  if(editGId){
+    const g=estado.gastos.find(x=>x.id===editGId);
+    if(g){Object.assign(g,{monto,cat:gCatSel,pago:gPagoSel,tipo:gTipoSel,nota:nota||CAT_N_G[gCatSel],fecha});}
+    editGId=null;
+  }else{
+    const now=new Date();
+    const hora=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    estado.gastos.unshift({id:Date.now(),tipo:gTipoSel,cat:gCatSel,monto,nota:nota||CAT_N_G[gCatSel],pago:gPagoSel,fecha,hora,rec:false});
+  }
+  guardar();cerrarModalG();pintarTodoG();toast('Guardado 💸');
 }
 function cerrarModalG(){document.getElementById('modalGasto').style.display='none';editGId=null;}
 
@@ -2587,8 +2710,9 @@ function pintarUniversidad(){
   const el = document.getElementById('uniContenido');
   if(el){
     if(!estado.clases.length){
-      el.innerHTML = '<div class="hint" style="margin-bottom:8px">Agrega tus clases en 📚 Uni</div>';
+      el.style.display = 'none';
     } else {
+      el.style.display = '';
       const prox = proximaClase();
       if(prox){
         const col = '#3A8FFF';
@@ -3015,7 +3139,7 @@ function pintarTodo(){
   if(zs) zs.value = estado.salida || '';
   pintarHero(); pintarAviso(); pintarPlan(); pintarRutas(); pintarViajes(); pintarBitacora();
   pintarBajadas(); pintarTodoG(); pintarNotas(); pintarListaRutasEdit(); pintarFrecuentes();
-  pintarPresupuesto(); pintarUniversidad(); pintarDinero(); pintarTemas(); pintarProximamente(); pintarNotifStatus();
+  pintarPresupuesto(); pintarUniversidad(); pintarDinero(); pintarTemas(); pintarProximamente(); pintarNotifStatus(); pintarApps();
 }
 
 /* Salir del modo hora con Escape */
