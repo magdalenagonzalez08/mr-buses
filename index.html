@@ -473,6 +473,9 @@
     </div>
     <div class="aviso-salida" id="avisoSalida"></div>
 
+    <!-- Próximamente (buses y clases) -->
+    <div class="card" id="proximamenteCard" style="margin-top:8px;border-left:3px solid var(--blue)"></div>
+
     <!-- Planificador de viajes con transbordo -->
     <div class="card plan">
       <div class="plan-titulo">🗺️ ¿A dónde vas?</div>
@@ -694,6 +697,12 @@
         <button class="btn ghost" onclick="setTema('claro')">☀️ Claro</button>
       </div>
       <button class="btn ghost" style="margin-top:8px" onclick="abrirModoHora()">🕒 Modo solo hora</button>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin:0 0 6px">Avisos 🔔</div>
+      <div class="hint" style="font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:8px">Te aviso en la pantalla de bloqueo cuando salga tu bus o empiece tu clase. <b>Sin sonido</b>, solo vibración visual.</div>
+      <div id="notifStatus" style="font-size:12px;font-weight:700;margin-bottom:8px"></div>
+      <button class="btn" id="btnNotif" onclick="pedirPermisoNotif()">🔔 Activar avisos</button>
     </div>
     <div class="card">
       <div class="section-title" style="margin:0 0 10px">Presupuesto de transporte</div>
@@ -2819,14 +2828,145 @@ function tick(){
   if(secActual === 'inicio'){
     const d = new Date();
     const m = d.getHours()*60 + d.getMinutes();
-    // solo repintar hero si cambió el minuto o hay countdown activo
     if(m !== _lastTickMin || _heroCountdown){
       _lastTickMin = m;
-      pintarHero(); pintarAviso();
+      pintarHero(); pintarAviso(); pintarProximamente();
+      revisarNotificaciones();
     }
   }
 }
 let _lastTickMin = -1, _heroCountdown = false;
+
+/* ---------- Notificaciones ---------- */
+let _notifYaEnviadas = {};
+function pedirPermisoNotif(){
+  if(!('Notification' in window)){ toast('Tu navegador no soporta notificaciones 😕'); return; }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){ estado.notifActivo=true; guardar(); toast('Avisos activados (sin sonido) 🔔'); }
+    else toast('Permiso denegado 😕');
+    pintarNotifStatus();
+  });
+}
+function notifVisible(titulo, cuerpo){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  if(!estado.notifActivo) return;
+  try{ new Notification(titulo, { body: cuerpo, icon: 'icon.svg', badge: 'icon.svg', tag: 'mr-'+Date.now(), renotify: false, silent: true }); }catch(e){}
+}
+function pintarNotifStatus(){
+  const el = document.getElementById('notifStatus');
+  const btn = document.getElementById('btnNotif');
+  if(!el || !btn) return;
+  if(!('Notification' in window)){
+    el.innerHTML = '<span style="color:var(--muted)">Tu navegador no soporta avisos 😕</span>';
+    btn.style.display = 'none';
+    return;
+  }
+  if(Notification.permission === 'granted' && estado.notifActivo){
+    el.innerHTML = '<span style="color:#30D158">✅ Avisos activados (sin sonido)</span>';
+    btn.textContent = '🔕 Desactivar avisos';
+    btn.onclick = function(){ estado.notifActivo = false; guardar(); pintarNotifStatus(); toast('Avisos desactivados'); };
+  } else if(Notification.permission === 'granted'){
+    el.innerHTML = '<span style="color:var(--warn)">⚠️ Permiso dado pero avisos apagados</span>';
+    btn.textContent = '🔔 Activar avisos';
+    btn.onclick = function(){ estado.notifActivo = true; guardar(); pintarNotifStatus(); toast('Avisos activados 🔔'); };
+  } else if(Notification.permission === 'denied'){
+    el.innerHTML = '<span style="color:var(--danger)">❌ Permiso bloqueado. Actívalo desde los ajustes del navegador.</span>';
+    btn.style.display = 'none';
+  } else {
+    el.innerHTML = '<span style="color:var(--muted)">Sin activar todavía</span>';
+    btn.textContent = '🔔 Activar avisos';
+    btn.onclick = pedirPermisoNotif;
+  }
+}
+function revisarNotificaciones(){
+  if(!estado.notifActivo || !('Notification' in window) || Notification.permission!=='granted') return;
+  const ahora = ahoraMin();
+  const diaIdx = new Date().getDay();
+  const hoyStr = fechaDe(new Date());
+
+  // Buses próximos (15 min antes)
+  estado.rutas.filter(r=>r.tipo==='bus').forEach(r=>{
+    const p = proximaSalida(r);
+    if(p && p.enMin > 0 && p.enMin <= 15){
+      const key = 'bus_'+r.id+'_'+p.hora+'_'+hoyStr;
+      if(!_notifYaEnviadas[key]){
+        _notifYaEnviadas[key] = true;
+        notifVisible('🚌 '+r.nombre.split('·')[0].trim(), 'Sale en '+fmtCuenta(p.enMin)+' min a las '+p.hora);
+      }
+    }
+  });
+
+  // Clases próximas (30 min antes)
+  estado.clases.filter(c=>c.dia===diaIdx).forEach(c=>{
+    const cMin = aMin(c.hora);
+    const delta = cMin - ahora;
+    if(delta > 0 && delta <= 30){
+      const key = 'clase_'+c.id+'_'+hoyStr;
+      if(!_notifYaEnviadas[key]){
+        _notifYaEnviadas[key] = true;
+        notifVisible('📚 '+c.nombre, 'Clase en '+fmtCuenta(delta)+' min · '+c.hora);
+      }
+    }
+  });
+
+  // Limpiar notificaciones viejas (más de 1 día)
+  const claves = Object.keys(_notifYaEnviadas);
+  if(claves.length > 50){ _notifYaEnviadas = {}; }
+}
+
+/* ---------- Card Próximamente ---------- */
+function pintarProximamente(){
+  const el = document.getElementById('proximamenteCard');
+  if(!el) return;
+  const ahora = ahoraMin();
+  const diaIdx = new Date().getDay();
+  const items = [];
+
+  // Buses
+  estado.rutas.filter(r=>r.tipo==='bus').forEach(r=>{
+    const p = proximaSalida(r);
+    if(p && p.enMin >= 0 && p.enMin <= 120){
+      items.push({ tipo:'bus', nombre:r.nombre.split('·')[0].trim(), hora:p.hora, enMin:p.enMin, empresa:r.empresa });
+    }
+  });
+  items.sort((a,b)=>a.enMin-b.enMin);
+
+  // Clases de hoy
+  const clasesHoy = estado.clases.filter(c=>c.dia===diaIdx).map(c=>{
+    const cMin = aMin(c.hora);
+    const delta = cMin - ahora;
+    return { nombre:c.nombre, hora:c.hora, enMin:delta, esClase:true };
+  }).filter(c=>c.enMin >= 0);
+
+  let html = '';
+
+  // Próxima clase
+  if(clasesHoy.length){
+    const c = clasesHoy[0];
+    const color = c.enMin <= 15 ? '#FF6B6B' : c.enMin <= 30 ? '#FF9F0A' : '#30D158';
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border-left:3px solid '+color+';margin-bottom:6px">'+
+      '<span style="font-size:18px">📚</span>'+
+      '<div style="flex:1"><div style="font-size:12px;font-weight:800">'+esc(c.nombre)+'</div>'+
+      '<div style="font-size:10px;color:var(--muted);font-weight:600">Clase a las '+c.hora+'</div></div>'+
+      '<div style="font-size:11px;font-weight:900;color:'+color+'">'+(c.enMin<=0?'AHORA':'en '+fmtCuenta(c.enMin))+'</div></div>';
+  }
+
+  // Próximos buses (top 3)
+  items.slice(0,3).forEach(b=>{
+    const color = b.enMin <= 5 ? '#FF6B6B' : b.enMin <= 15 ? '#FF9F0A' : '#30D158';
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border-left:3px solid '+color+';margin-bottom:6px">'+
+      '<span style="font-size:18px">🚌</span>'+
+      '<div style="flex:1"><div style="font-size:12px;font-weight:800">'+esc(b.nombre)+'</div>'+
+      '<div style="font-size:10px;color:var(--muted);font-weight:600">Sale a las '+b.hora+(b.empresa?' · '+esc(b.empresa):'')+'</div></div>'+
+      '<div style="font-size:11px;font-weight:900;color:'+color+'">en '+fmtCuenta(b.enMin)+'</div></div>';
+  });
+
+  if(!html){
+    html = '<div style="text-align:center;padding:12px;color:var(--muted);font-size:11px;font-weight:600">No hay buses ni clases próximas 🎉</div>';
+  }
+
+  el.innerHTML = html;
+}
 function pintarTodo(){
   const ph = document.getElementById('planHora');
   if(!ph.value){
@@ -2843,7 +2983,7 @@ function pintarTodo(){
   if(zs) zs.value = estado.salida || '';
   pintarHero(); pintarAviso(); pintarPlan(); pintarRutas(); pintarViajes(); pintarBitacora();
   pintarBajadas(); pintarTodoG(); pintarNotas(); pintarListaRutasEdit(); pintarFrecuentes();
-  pintarPresupuesto(); pintarUniversidad(); pintarDinero(); pintarTemas();
+  pintarPresupuesto(); pintarUniversidad(); pintarDinero(); pintarTemas(); pintarProximamente(); pintarNotifStatus();
 }
 
 /* Salir del modo hora con Escape */
