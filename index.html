@@ -13,28 +13,36 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <title>MR · Buses</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
   :root{
-    --bg:#060D1A;--bg2:#0A1628;--glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.03);
+    --bg:#060D1A;--bg2:#0A1628;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.03);
     --border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.06);
     --txt:#EEF4FF;--muted:#7A94B8;--blue:#0A84FF;--blue2:#5AC8FA;--blue3:#0040DD;
-    --ok:#30D158;--warn:#FF9F0A;--danger:#FF453A;--nav:rgba(8,16,32,.92);--purple:#BF5AF2;--teal:#64D2FF;
-    --shadow:0 4px 24px rgba(0,0,0,.4);--radius:20px;
+    --ok:#30D158;--warn:#FF9F0A;--danger:#FF453A;--nav:rgba(8,16,32,.95);--purple:#BF5AF2;--teal:#64D2FF;
+    --shadow:0 2px 12px rgba(0,0,0,.25);--radius:16px;
   }
   html[data-tema="claro"]{
-    --bg:#EFF4FB;--bg2:#E2ECF9;--glass:rgba(255,255,255,.82);--glass2:rgba(255,255,255,.5);
+    --bg:#EFF4FB;--bg2:#E2ECF9;--glass:rgba(255,255,255,.9);--glass2:rgba(255,255,255,.6);
     --border:rgba(10,50,100,.12);--border2:rgba(10,50,100,.06);
-    --txt:#0B1E3A;--muted:#5A7399;--nav:rgba(255,255,255,.94);--purple:#A040C8;--teal:#0A84A8;
-    --shadow:0 4px 20px rgba(10,40,80,.08);
+    --txt:#0B1E3A;--muted:#5A7399;--nav:rgba(255,255,255,.96);--purple:#A040C8;--teal:#0A84A8;
+    --shadow:0 2px 8px rgba(10,40,80,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
-    background:radial-gradient(900px 480px at 82% -8%,rgba(10,132,255,.14) 0%,transparent 52%),var(--bg);
-    color:var(--txt);min-height:100vh;padding-bottom:130px;overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:130px;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased
   }
+  html[data-modo="ligero"] *{transition:none!important;animation:none!important}
+  html[data-modo="ligero"] body{background:var(--bg)}
+  html[data-modo="ligero"] .card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;background:var(--bg2)}
+  html[data-modo="ligero"] .icon-btn,
+  html[data-modo="ligero"] .bottom-nav,
+  html[data-modo="ligero"] .chip-salida,
+  html[data-modo="ligero"] .viaje-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}
+  html[data-modo="ligero"] .hero{box-shadow:none}
+  html[data-modo="ligero"] .hero::before,
+  html[data-modo="ligero"] .hero::after{display:none}
+  html[data-modo="ligero"] .logo{box-shadow:none}
   input,select,textarea{max-width:100%}
   .vp-t,.vp-m,.ruta-nombre,.app-nombre,.viaje-head .dest,.plan-linea>div,.hint,.sale{overflow-wrap:anywhere;min-width:0}
   .plan-linea>div{overflow:hidden}
@@ -56,18 +64,16 @@
   .brand span{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.2px}
   .icon-btn{
     width:42px;height:42px;border-radius:14px;border:1px solid var(--border);background:var(--glass);
-    color:var(--txt);font-size:16px;cursor:pointer;transition:.2s;display:grid;place-items:center;
-    backdrop-filter:blur(16px)
+    color:var(--txt);font-size:16px;cursor:pointer;display:grid;place-items:center
   }
   .icon-btn:active{transform:scale(.92)}
 
   /* Cards */
   .card{
-    background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(20px);
+    background:var(--glass);border:1px solid var(--border);
     border-radius:var(--radius);padding:15px;margin-bottom:12px;
-    box-shadow:var(--shadow);transition:.3s
+    box-shadow:var(--shadow)
   }
-  .card:active{transform:scale(.99)}
   .section-title{font-size:10.5px;font-weight:800;letter-spacing:1.1px;color:var(--muted);text-transform:uppercase;margin:16px 2px 10px;display:flex;justify-content:space-between;align-items:center}
 
   /* Hero */
@@ -427,13 +433,14 @@
   .mh-close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:5;backdrop-filter:blur(8px);transition:.2s}
   .mh-close:active{transform:scale(.92)}
 
-  @media (max-height:500px) and (orientation:landscape){
-    .modo-hora{gap:2px;padding:8px 12px;justify-content:center}
-    .modo-hora .grande{font-size:clamp(60px,20vh,110px)}
-    .modo-hora .seg{font-size:16px;margin-top:-2px}
-    .modo-hora .sub{font-size:12px}
-    .modo-hora .prox-bus{padding:8px 16px;font-size:12px;margin-top:2px;max-width:94vw}
+  @media (orientation:landscape) and (max-height:520px){
+    .modo-hora{gap:4px;padding:10px 16px;justify-content:center;flex-direction:row;flex-wrap:wrap}
+    .modo-hora .grande{font-size:clamp(52px,18vh,90px)}
+    .modo-hora .seg{font-size:14px;margin-top:0}
+    .modo-hora .sub{font-size:11px;padding:0 12px;max-width:45vw}
+    .modo-hora .prox-bus{padding:6px 14px;font-size:11px;margin-top:0;max-width:45vw}
     .modo-hora .salir-hint{display:none}
+    .modo-hora .mh-close{top:8px;right:8px;width:36px;height:36px;font-size:14px}
   }
 
   /* Bitácora */
@@ -697,6 +704,8 @@
         <button class="btn ghost" onclick="setTema('claro')">☀️ Claro</button>
       </div>
       <button class="btn ghost" style="margin-top:8px" onclick="abrirModoHora()">🕒 Modo solo hora</button>
+      <div class="hint" style="font-size:11px;color:var(--muted);font-weight:600;margin-top:10px">¿Celular lento? Modo ligero = más fluido</div>
+      <button class="btn ghost" style="margin-top:6px" id="btnLigero" onclick="toggleModoLigero()">⚡ Modo ligero</button>
     </div>
     <div class="card">
       <div class="section-title" style="margin:0 0 6px">Avisos 🔔</div>
@@ -791,7 +800,7 @@
       </a>
     </div>
     <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
-      MR v3.0 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
+      MR v3.1 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
     </div>
   </section>
 </div>
@@ -966,7 +975,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY = 'miruta_v3';
+const KEY = 'miruta_v31';
 const DIAS_FULL = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -1020,7 +1029,7 @@ const APPS_DEF = [
   { nombre:'inDriver Terminal→UTP', icono:'🚗', costo:3.00 }
 ];
 
-let estado = { rutas:[], bajadas:[], gastos:[], notas:[], viajes:[], caminatas:[], frecuentes:[], presupuesto:null, tema:'oscuro', acento:'azul', bajadaFav:null, salida:'Dolega', apps:[], ahorro:{ meta:0, registros:[] }, dinero:{ dia:'', monto:0 }, clases:[] };
+let estado = { rutas:[], bajadas:[], gastos:[], notas:[], viajes:[], caminatas:[], frecuentes:[], presupuesto:null, tema:'oscuro', acento:'azul', bajadaFav:null, salida:'Dolega', apps:[], ahorro:{ meta:0, registros:[] }, dinero:{ dia:'', monto:0 }, clases:[], notifActivo:false, modoLigero:false };
 let filtro = 'todos';
 let secActual = 'inicio';
 let editandoId = null;
@@ -1031,6 +1040,7 @@ function cargar(){
   try{
     let raw = localStorage.getItem(KEY);
     // Migración desde versiones anteriores
+    if(!raw){ raw = localStorage.getItem('miruta_v3'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v2'); if(raw) localStorage.setItem(KEY, raw); }
     if(!raw){ raw = localStorage.getItem('miruta_v9'); if(raw) localStorage.setItem(KEY, raw); }
     if(raw){ estado = Object.assign(estado, JSON.parse(raw)); }
@@ -1169,7 +1179,11 @@ function guardar(){ invalidarCache(); _opsCache.clear(); try{ localStorage.setIt
 /* ---------- Tema ---------- */
 function aplicarTema(){
   document.documentElement.setAttribute('data-tema', estado.tema === 'claro' ? 'claro' : 'oscuro');
-  document.getElementById('btnTema').textContent = estado.tema === 'claro' ? '☀️' : '🌙';
+  document.documentElement.setAttribute('data-modo', estado.modoLigero ? 'ligero' : 'normal');
+  const btnT = document.getElementById('btnTema');
+  if(btnT) btnT.textContent = estado.tema === 'claro' ? '☀️' : '🌙';
+  const btnL = document.getElementById('btnLigero');
+  if(btnL) btnL.textContent = estado.modoLigero ? '⚡ Modo ligero: ON' : '⚡ Modo ligero';
   if(estado.acento){
     const t = TEMAS_ACCENTO.find(x=>x.id===estado.acento);
     if(t){
@@ -1180,6 +1194,11 @@ function aplicarTema(){
 }
 function setTema(t){ estado.tema = t; aplicarTema(); guardar(); toast(t==='claro' ? 'Modo claro ☀️' : 'Modo oscuro 🌙'); }
 function toggleTema(){ setTema(estado.tema === 'claro' ? 'oscuro' : 'claro'); }
+function toggleModoLigero(){
+  estado.modoLigero = !estado.modoLigero;
+  aplicarTema(); guardar();
+  toast(estado.modoLigero ? '⚡ Modo ligero activado' : '🌙 Modo normal activado');
+}
 
 /* ---------- Color de acento ---------- */
 const TEMAS_ACCENTO = [
