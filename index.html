@@ -1141,6 +1141,7 @@ function cargar(){
   if(!Array.isArray(estado.apps) || !estado.apps.length) estado.apps = APPS_DEF.map(a=>({...a}));
   if(!estado.ahorro) estado.ahorro = { meta:0, registros:[] };
   if(!Array.isArray(estado.ahorro.registros)) estado.ahorro.registros = [];
+  normalizarAhorro();
   if(!estado.dinero) estado.dinero = { dia:'', monto:0 };
   if(!Array.isArray(estado.clases)) estado.clases = [];
   // cargar horario UTP si no tiene (o si tenía vacío de versiones anteriores)
@@ -1339,6 +1340,7 @@ function importarDatos(input){
         estado = Object.assign(estado, datos);
         if(!estado.ahorro) estado.ahorro = { meta:0, registros:[] };
         if(!Array.isArray(estado.ahorro.registros)) estado.ahorro.registros = [];
+        normalizarAhorro();
         if(!estado.dinero) estado.dinero = { dia:'', monto:0 };
         if(!Array.isArray(estado.clases)) estado.clases = [];
         if(!Array.isArray(estado.gastos)) estado.gastos = [];
@@ -1520,66 +1522,124 @@ function setAppCosto(i, v){
 }
 
 /* ---------- Ahorro ---------- */
+function idAhorro(){
+  return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+}
+function fechaCortaAhorro(fecha){
+  if(fecha === hoyFecha()) return 'Hoy';
+  const a = new Date(); a.setDate(a.getDate()-1);
+  const ayer = a.getFullYear()+'-'+String(a.getMonth()+1).padStart(2,'0')+'-'+String(a.getDate()).padStart(2,'0');
+  if(fecha === ayer) return 'Ayer';
+  const p = String(fecha).split('-');
+  return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : fecha;
+}
+/* Limpia un registro suelto: sin fecha válida, monto raro o id roto, se descarta */
+function saneAhorro(r){
+  if(!r || typeof r !== 'object') return null;
+  const fecha = String(r.fecha||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return null;
+  const monto = Math.round((Number(r.monto)||0)*100)/100;
+  if(!(monto > 0) || monto > 9999) return null;
+  const id = String(r.id||'').replace(/[^A-Za-z0-9_-]/g,'').slice(0,40) || idAhorro();
+  return { id, fecha, monto, nota: String(r.nota||'').slice(0,80) };
+}
+/* Se llama al cargar y al importar: deja el ahorro siempre en un estado usable */
+function normalizarAhorro(){
+  if(!estado.ahorro || typeof estado.ahorro !== 'object') estado.ahorro = { meta:0, registros:[] };
+  let meta = Number(estado.ahorro.meta);
+  estado.ahorro.meta = (!isFinite(meta) || meta < 0) ? 0 : Math.min(9999, Math.round(meta*100)/100);
+  const lista = Array.isArray(estado.ahorro.registros) ? estado.ahorro.registros : [];
+  const vistos = {};
+  estado.ahorro.registros = lista.map(saneAhorro).filter(Boolean).map(r=>{
+    if(vistos[r.id]) r.id = idAhorro();
+    vistos[r.id] = true;
+    return r;
+  }).sort((a,b)=> a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0).slice(0,300);
+}
 function totalAhorroMes(){
   const d = new Date();
   const ini = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
-  return (estado.ahorro.registros||[]).filter(r=>r.fecha >= ini).reduce((a,r)=>a+(Number(r.monto)||0),0);
+  const hoy = hoyFecha();
+  return (estado.ahorro.registros||[]).filter(r=>r.fecha >= ini && r.fecha <= hoy).reduce((a,r)=>a+(Number(r.monto)||0),0);
 }
 function pintarAhorro(){
   const cont = document.getElementById('ahorroContenido');
   if(!cont) return;
   const meta = Number(estado.ahorro.meta)||0;
   const total = totalAhorroMes();
-  const pct = meta > 0 ? Math.min(100, Math.round(total/meta*100)) : 0;
+  const pct = meta > 0 ? Math.round(total/meta*100) : 0;
+  const ancho = Math.min(100, pct);
   const regs = (estado.ahorro.registros||[]).slice(0,8);
   const quedan = Math.max(0, meta - total);
   const diasRest = diasRestantesPeriodo('mes');
-  const alDia = diasRest > 0 ? Math.floor(quedan / diasRest * 100) / 100 : 0;
   const nivel = pct >= 100 ? 'over' : pct >= 75 ? 'warn' : '';
+  let pista;
+  if(meta <= 0) pista = 'Pon una meta para ver cuánto te falta.';
+  else if(total >= meta) pista = '¡Meta cumplida! 🎉';
+  else pista = 'Te faltan $'+fmtNum(quedan)+' · $'+fmtNum(quedan/diasRest)+' por día ('+diasRest+(diasRest===1?' día':' días')+')';
   cont.innerHTML =
     '<div class="presu-bar"><div class="presu-fill '+nivel+'" id="ahFill" style="width:0%"></div></div>'+
     '<div class="presu-txt"><span>$'+fmtNum(total)+' / $'+fmtNum(meta)+'</span><span class="q">'+pct+'%</span></div>'+
+    '<div class="hint" style="margin-top:4px">'+pista+'</div>'+
     '<div class="section-title" style="margin:12px 0 6px">Registrar ahorro</div>'+
     '<input type="number" id="ahMonto" step="0.05" min="0" max="9999" placeholder="¿Cuánto ahorraste? $" inputmode="decimal" style="margin-bottom:6px">'+
-    '<input type="text" id="ahNota" placeholder="Nota: caminé, me sobró..." maxlength="80" style="margin-bottom:8px">'+
+    '<input type="text" id="ahNota" placeholder="Nota: caminé, me sobró..." maxlength="80" style="margin-bottom:6px">'+
+    '<div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px">📅 FECHA</div>'+
+    '<input type="date" id="ahFecha" value="'+hoyFecha()+'" max="'+hoyFecha()+'" style="margin-bottom:8px">'+
     '<button class="btn full" onclick="guardarAhorro()">＋ Guardar ahorro</button>'+
     '<div class="section-title" style="margin:14px 0 6px">Meta del mes</div>'+
     '<input type="number" id="ahMeta" step="0.50" min="0" max="9999" placeholder="¿Cuánto quieres ahorrar? $" inputmode="decimal" value="'+(meta||'')+'" style="margin-bottom:8px">'+
     '<button class="btn ghost full" onclick="guardarMetaAhorro()">🎯 Guardar meta</button>'+
     (regs.length
       ? '<div class="section-title" style="margin:14px 0 4px">Últimos ahorros</div>'+regs.map(r=>{
-          const esHoy = r.fecha === hoyFecha();
-          const fecha = esHoy ? 'Hoy' : r.fecha;
           return '<div class="app-row"><span class="app-ico" style="flex-shrink:0">🐷</span><span class="app-nombre" style="flex:1;min-width:0;overflow:hidden">'+esc(r.nota||'Ahorro')+
-          '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+fecha+'</div></span>'+
+          '<div style="font-size:10.5px;color:var(--muted);font-weight:700">'+fechaCortaAhorro(r.fecha)+'</div></span>'+
           '<span style="font-weight:850;font-size:13px;color:var(--ok);white-space:nowrap;flex-shrink:0">+$'+fmtNum(r.monto)+'</span>'+
           '<button class="btn small ghost" onclick="borrarAhorro(\''+r.id+'\')" style="padding:2px 7px;color:#FF8A80;font-size:11px;flex-shrink:0" title="Borrar">✕</button></div>';
         }).join('')
       : '<div style="font-size:12px;color:var(--muted);font-weight:700;margin-top:10px;line-height:1.5">Sin ahorros. Ej: caminaste en vez del bus, o te sobró del pasaje.</div>');
-  requestAnimationFrame(()=>{ const f=document.getElementById('ahFill'); if(f) f.style.width=pct+'%'; });
+  requestAnimationFrame(()=>{ const f=document.getElementById('ahFill'); if(f) f.style.width=ancho+'%'; });
 }
 function guardarAhorro(){
   const inp = document.getElementById('ahMonto');
-  const monto = Math.round(parseFloat(inp.value)*100)/100;
-  if(isNaN(monto) || monto <= 0){ toast('Pon un monto válido 🐷'); return; }
+  const monto = Math.round((Number(String(inp.value).replace(',','.'))||0)*100)/100;
+  if(!(monto > 0)){ toast('Pon un monto válido 🐷'); return; }
   if(monto > 9999){ toast('Monto máximo $9,999 🐷'); return; }
+  const fInp = document.getElementById('ahFecha');
+  const fecha = (fInp && fInp.value) || hoyFecha();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha)){ toast('Fecha no válida 📅'); return; }
+  if(fecha > hoyFecha()){ toast('No puedes ahorrar en el futuro 📅'); return; }
   estado.ahorro.registros.unshift({
-    id:'a'+Date.now(), fecha: hoyFecha(), monto,
+    id: idAhorro(), fecha, monto,
     nota: (document.getElementById('ahNota').value||'').trim().slice(0,80)
   });
+  if(estado.ahorro.registros.length > 300) estado.ahorro.registros.length = 300;
+  estado.ahorro.registros.sort((a,b)=> a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0);
   guardar(); pintarAhorro();
-  toast('¡Ahorraste $'+fmtNum(monto)+'! 🐷');
+  toast('¡Ahorraste $'+fmtNum(monto)+'! 🐷'+(fecha===hoyFecha()?'':' · '+fechaCortaAhorro(fecha)));
 }
 function borrarAhorro(id){
-  estado.ahorro.registros = (estado.ahorro.registros||[]).filter(r=>r.id!==id);
+  const idx = (estado.ahorro.registros||[]).findIndex(r=>r.id===id);
+  if(idx < 0){ toast('Ese ahorro ya no existe 🐷'); pintarAhorro(); return; }
+  undoG = null;
+  undoAhorro = { reg: estado.ahorro.registros[idx], idx };
+  estado.ahorro.registros.splice(idx,1);
   guardar(); pintarAhorro();
-  toast('Ahorro borrado 🗑️');
+  mostrarSnackG('Ahorro eliminado');
+}
+function setMetaAhorro(valor){
+  let m = Number(String(valor).replace(',','.'));
+  estado.ahorro.meta = (!isFinite(m) || m < 0) ? 0 : Math.min(9999, Math.round(m*100)/100);
+  guardar(); pintarAhorro();
+  toast(estado.ahorro.meta > 0 ? 'Meta: $'+fmtNum(estado.ahorro.meta)+' al mes 🎯' : 'Meta quitada 🎯');
 }
 function guardarMetaAhorro(){
-  const monto = parseFloat(document.getElementById('ahMeta').value);
-  estado.ahorro.meta = (isNaN(monto) || monto < 0) ? 0 : monto;
-  guardar(); pintarAhorro();
-  toast('Meta: $'+fmtNum(estado.ahorro.meta)+' al mes 🎯');
+  const raw = (document.getElementById('ahMeta').value||'').trim();
+  if(raw !== ''){
+    const m = Number(raw.replace(',','.'));
+    if(!isFinite(m) || m < 0){ toast('Pon una meta válida 🎯'); return; }
+  }
+  setMetaAhorro(raw || 0);
 }
 function guardarPresupuesto(){
   const monto = parseFloat(document.getElementById('prMonto').value);
@@ -2277,7 +2337,7 @@ function pintarCaminatas(){
 const CATS_G={bus:'🚌',taxi:'🚕',comida:'🍳',tienda:'🏪',recarga:'📱',estudio:'📚',ropa:'👕',salud:'💊',otro:'💳',ingreso:'⬆'};
 const CAT_N_G={bus:'Buses',taxi:'Taxis',comida:'Comida',tienda:'Tienda',recarga:'Recarga',estudio:'Estudio',ropa:'Ropa',salud:'Salud',otro:'Otro',ingreso:'Ingresos'};
 const CAT_C_G={bus:'#0A84FF',taxi:'#FF9F0A',comida:'#FF6B6B',tienda:'#FFD60A',recarga:'#30D158',estudio:'#BF5AF2',ropa:'#FF64C8',salud:'#5AC8FA',otro:'#7A94B8',ingreso:'#30D158'};
-let editGId=null, undoG=null, snackTimer=null;
+let editGId=null, undoG=null, undoAhorro=null, snackTimer=null;
 let gPeriodo='hoy', gCatSel='bus', gPagoSel='efectivo', gTipoSel='egreso';
 
 function fechaLocal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2401,12 +2461,18 @@ function editarGastoV2(id){
 
 function borrarGasto(id){
   const idx=estado.gastos.findIndex(x=>x.id===id);if(idx<0)return;
+  undoAhorro=null;
   undoG={gasto:estado.gastos[idx],idx};
   estado.gastos.splice(idx,1);guardar();pintarTodoG();
   mostrarSnackG('Gasto eliminado');
 }
 
 function deshacerG(){
+  if(undoAhorro){
+    estado.ahorro.registros.splice(undoAhorro.idx,0,undoAhorro.reg);
+    undoAhorro=null;guardar();pintarAhorro();ocultarSnackG();
+    return;
+  }
   if(!undoG)return;
   estado.gastos.splice(undoG.idx,0,undoG.gasto);
   undoG=null;guardar();pintarTodoG();ocultarSnackG();
@@ -2424,6 +2490,7 @@ function ocultarSnackG(){
   if(el) el.style.display='none';
   clearTimeout(snackTimer);
   undoG=null;
+  undoAhorro=null;
 }
 
 function abrirModalG(){
@@ -2662,7 +2729,10 @@ function editarPresu(){
 }
 function editarMeta(){
   const v=prompt('¿Cuánto quieres ahorrar este mes?',estado.ahorro?.meta||'');
-  if(v!==null){if(!estado.ahorro)estado.ahorro={};estado.ahorro.meta=parseFloat(v)||0;guardar();pintarAhorro();}
+  if(v===null) return;
+  const m=Number(String(v).replace(',','.'));
+  if(!isFinite(m) || m<0 || m>9999){ toast('Meta inválida (0 a 9,999) 🎯'); return; }
+  setMetaAhorro(v);
 }
 
 function exportarCSVG(){
@@ -2990,7 +3060,7 @@ function borrarTodo(){
   estado.rutas = []; estado.bajadas = []; estado.gastos = [];
   estado.notas = []; estado.viajes = []; estado.caminatas = []; estado.frecuentes = [];
   estado.bajadaFav = null; estado.presupuesto = null;
-  estado.ahorro.registros = [];
+  estado.ahorro = { meta:0, registros:[] };
   estado.dinero = { dia:'', monto:0 };
   estado.clases = [];
   const pr = document.getElementById('prMonto');
