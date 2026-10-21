@@ -9,7 +9,7 @@
 [![Demo](https://img.shields.io/badge/Demo-en_vivo-2ea44f?style=flat-square)](https://magdalenagonzalez08.github.io/mr-buses/)
 [![APK](https://img.shields.io/badge/APK-Android-3DDC84?style=flat-square&logo=android&logoColor=white)](https://github.com/magdalenagonzalez08/mr-buses/releases/latest)
 [![PWA](https://img.shields.io/badge/PWA-instalable-5A0FC8?style=flat-square)](https://magdalenagonzalez08.github.io/mr-buses/)
-[![Sin conexión](https://img.shields.io/badge/Funciona-sin_conexión-0A84FF?style=flat-square)](#tecnologías)
+[![Sin conexión](https://img.shields.io/badge/Funciona-sin_internet-0A84FF?style=flat-square)](#tecnologías)
 
 </div>
 
