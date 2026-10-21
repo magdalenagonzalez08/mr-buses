@@ -11,8 +11,8 @@ android {
         applicationId = "com.mr.buses"
         minSdk = 29
         targetSdk = 34
-        versionCode = 12
-        versionName = "4.9"
+        versionCode = 13
+        versionName = "4.9.1"
     }
 
     signingConfigs {

@@ -862,7 +862,7 @@
       </a>
     </div>
     <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
-      MR v4.9 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
+      MR v4.9.1 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
     </div>
   </section>
 </div>
@@ -1914,7 +1914,7 @@ function renderViaje(o, i){
     const esperaBus = primerLeg.s.ref.enMin;
     pasos += '<div class="vpaso espera" style="border-left-color:#FFB340;background:#FFB34012">'+
       '<div class="vp-t">⏰ No hay buses a las '+fmtHora(saleCasa)+'</div>'+
-      '<div class="vp-m">El próximo <b>'+esc(primerLeg.r.nombre.split('(')[0].trim())+'</b> sale a las <b>'+primerLeg.s.ref.hora+'</b> · esperas '+fmtCuenta(esperaBus)+' min</div></div>';
+      '<div class="vp-m">El próximo <b>'+esc(primerLeg.r.nombre.split('(')[0].trim())+'</b> sale a las <b>'+primerLeg.s.ref.hora+'</b> · esperas '+fmtCuenta(esperaBus)+'</div></div>';
   }
 
   o.legs.forEach((leg, idx)=>{
@@ -2019,7 +2019,7 @@ function pintarRutas(){
     if(r.tipo === 'bus' && r.horarios && r.horarios.length){
       const min = Math.max(0, Math.round(p.enMin));
       const clase = min<=2?'urgent':min<=8?'muy-cerca':min<=20?'cerca':'';
-      proxHtml = '<div class="prox '+clase+'"><div class="en">'+fmtCuenta(min)+' <small>min</small></div><div class="salida">sale '+p.hora+'</div></div>';
+      proxHtml = '<div class="prox '+clase+'"><div class="en">'+fmtCuenta(min)+'</div><div class="salida">sale '+p.hora+'</div></div>';
     } else if(r.tipo === 'taxi'){
       proxHtml = '<div class="prox"><div class="en">'+(r.duracion||'')+' <small>min</small></div><div class="salida">taxi · cuando quieras</div></div>';
     } else {
@@ -3085,7 +3085,7 @@ function tickModoHora(){
     extra = ' · 🚶 sal de casa en '+salirEn+' min';
   }
   document.getElementById('mhProx').textContent = mejor
-    ? '🚌 '+mejor.r.nombre.split('·')[0].trim()+' en '+fmtCuenta(Math.max(0,Math.round(mejor.p.enMin)))+' min (sale '+mejor.p.hora+')'+extra
+    ? '🚌 '+mejor.r.nombre.split('·')[0].trim()+' en '+fmtCuenta(Math.max(0,Math.round(mejor.p.enMin)))+' (sale '+mejor.p.hora+')'+extra
     : '🚌 Sin horarios de bus';
 }
 
@@ -3171,7 +3171,7 @@ function revisarNotificaciones(){
       const key = 'bus_'+r.id+'_'+p.hora+'_'+hoyStr;
       if(!_notifYaEnviadas[key]){
         _notifYaEnviadas[key] = true;
-        notifVisible('🚌 '+r.nombre.split('·')[0].trim(), 'Sale en '+fmtCuenta(p.enMin)+' min a las '+p.hora);
+        notifVisible('🚌 '+r.nombre.split('·')[0].trim(), 'Sale en '+fmtCuenta(p.enMin)+' a las '+p.hora);
       }
     }
   });
@@ -3184,7 +3184,7 @@ function revisarNotificaciones(){
       const key = 'clase_'+c.id+'_'+hoyStr;
       if(!_notifYaEnviadas[key]){
         _notifYaEnviadas[key] = true;
-        notifVisible('📚 '+c.nombre, 'Clase en '+fmtCuenta(delta)+' min · '+c.hora);
+        notifVisible('📚 '+c.nombre, 'Clase en '+fmtCuenta(delta)+' · '+c.hora);
       }
     }
   });
