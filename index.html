@@ -318,10 +318,10 @@
     position:fixed;bottom:108px;left:50%;transform:translateX(-50%) translateY(80px);
     background:linear-gradient(135deg,#0E2A52,#0A1F3D);border:1px solid rgba(255,255,255,.12);color:#EAF2FF;
     padding:12px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:300;
-    transition:.35s cubic-bezier(.2,.9,.3,1);box-shadow:0 12px 32px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
-    pointer-events:auto;cursor:pointer
+    transition:.35s cubic-bezier(.2,.9,.3,1),visibility 0s .35s;box-shadow:0 12px 32px rgba(0,0,0,.45);white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+    pointer-events:auto;cursor:pointer;opacity:0;visibility:hidden
   }
-  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible;transition:.35s cubic-bezier(.2,.9,.3,1),visibility 0s 0s}
 
   /* Gastos */
   .wallet-row{display:flex;gap:8px;margin-top:4px;min-width:0;flex-wrap:wrap}
@@ -433,6 +433,7 @@
   .modo-hora .sub{font-size:15px;font-weight:700;color:var(--muted);text-align:center;padding:0 24px;line-height:1.4}
   .modo-hora .prox-bus{margin-top:8px;background:var(--glass);border:1px solid var(--border);border-radius:999px;padding:12px 22px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;max-width:90vw;text-align:center;backdrop-filter:blur(12px)}
   .modo-hora .salir-hint{position:absolute;bottom:24px;font-size:11px;font-weight:600;color:var(--muted)}
+  .modo-hora .mh-info{display:contents}
 
   .sec{display:none}
   .sec.on{display:block}
@@ -455,60 +456,45 @@
   .ahorro-ok{color:var(--ok)}
   .mh-close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--glass);color:var(--txt);font-size:17px;cursor:pointer;display:grid;place-items:center;z-index:5}
 
-  /* Modo hora: reloj DIGITAL gigante en landscape (automático) */
-  @media (orientation:landscape){
-    .modo-hora.show{
-      flex-direction:row;flex-wrap:nowrap;gap:12px 24px;padding:10px 24px;
-      justify-content:center;align-items:center;overflow:hidden
-    }
-    .modo-hora.show .grande{
-      font-size:clamp(80px,min(50vh,30vw),300px);letter-spacing:-6px;line-height:.9;
-      flex:0 0 auto
-    }
-    .modo-hora.show .grande small{font-size:.4em}
-    .modo-hora.show .seg{
-      font-size:clamp(16px,4vh,32px);font-weight:800;color:var(--blue2);
-      align-self:center;margin-top:0;flex:0 0 auto
-    }
-    .modo-hora.show .sub{
-      font-size:clamp(11px,2.5vh,18px);font-weight:700;padding:0;max-width:35vw;
-      line-height:1.2;text-align:left;flex:1;min-width:0;overflow:hidden
-    }
-    .modo-hora.show .prox-bus{
-      padding:6px 14px;font-size:clamp(11px,2.5vh,18px);font-weight:800;
-      margin-top:0;max-width:35vw;background:var(--glass);border:1px solid var(--border);
-      border-radius:999px;backdrop-filter:blur(12px);text-align:center;
-      flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
-    }
-    .modo-hora.show .salir-hint{display:none}
-    .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
+  /* Modo hora: reloj DIGITAL gigante en horizontal (al girar el celular o con el botón) */
+  html[data-hora-land="1"] .modo-hora.show{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-rows:auto auto;
+    align-content:center;align-items:center;
+    column-gap:clamp(10px,3.5vw,44px);row-gap:2px;
+    padding:10px clamp(14px,4vw,48px);
+    overflow:hidden
   }
-  /* Modo hora forzado horizontal: idem landscape */
-  html[data-hora="horizontal"] .modo-hora.show{
-    flex-direction:row;flex-wrap:nowrap;gap:12px 24px;padding:10px 24px;
-    justify-content:center;align-items:center;overflow:hidden
+  html[data-hora-land="1"] .modo-hora.show .grande{
+    grid-column:1;grid-row:1;
+    font-size:clamp(72px,min(52vh,30vw),300px);
+    letter-spacing:-.04em;line-height:.85
   }
-  html[data-hora="horizontal"] .modo-hora.show .grande{
-    font-size:clamp(80px,min(50vh,30vw),300px);letter-spacing:-6px;line-height:.9;
-    flex:0 0 auto
+  html[data-hora-land="1"] .modo-hora.show .grande small{font-size:.4em}
+  html[data-hora-land="1"] .modo-hora.show .seg{
+    grid-column:1;grid-row:2;
+    font-size:clamp(15px,4vh,30px);font-weight:800;color:var(--blue2);
+    margin:0;text-align:center;line-height:1
   }
-  html[data-hora="horizontal"] .modo-hora.show .grande small{font-size:.4em}
-  html[data-hora="horizontal"] .modo-hora.show .seg{
-    font-size:clamp(16px,4vh,32px);font-weight:800;color:var(--blue2);
-    align-self:center;margin-top:0;flex:0 0 auto
+  html[data-hora-land="1"] .modo-hora.show .mh-info{
+    grid-column:2;grid-row:1 / span 2;
+    display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    gap:8px;min-width:0;max-width:100%;overflow:hidden
   }
-  html[data-hora="horizontal"] .modo-hora.show .sub{
-    font-size:clamp(11px,2.5vh,18px);font-weight:700;padding:0;max-width:35vw;
-    line-height:1.2;text-align:left;flex:1;min-width:0;overflow:hidden
+  html[data-hora-land="1"] .modo-hora.show .sub{
+    font-size:clamp(12px,2.6vh,18px);font-weight:700;padding:0;
+    text-align:left;line-height:1.25;max-width:100%;
+    min-width:0;overflow:hidden;overflow-wrap:anywhere
   }
-  html[data-hora="horizontal"] .modo-hora.show .prox-bus{
-    padding:6px 14px;font-size:clamp(11px,2.5vh,18px);font-weight:800;
-    margin-top:0;max-width:35vw;background:var(--glass);border:1px solid var(--border);
-    border-radius:999px;backdrop-filter:blur(12px);text-align:center;
-    flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+  html[data-hora-land="1"] .modo-hora.show .prox-bus{
+    margin:0;padding:6px 14px;font-size:clamp(11px,2.4vh,17px);font-weight:800;
+    background:var(--glass);border:1px solid var(--border);border-radius:999px;
+    backdrop-filter:blur(12px);text-align:left;max-width:100%;
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
   }
-  html[data-hora="horizontal"] .modo-hora.show .salir-hint{display:none}
-  html[data-hora="horizontal"] .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
+  html[data-hora-land="1"] .modo-hora.show .salir-hint{display:none}
+  html[data-hora-land="1"] .modo-hora.show .mh-close{top:6px;right:6px;width:32px;height:32px;font-size:13px}
 
   /* Bitácora */
   #bitacoraHoy{line-height:1.5}
@@ -876,7 +862,7 @@
       </a>
     </div>
     <div style="text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:16px;line-height:1.6">
-      MR v4.0 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
+      MR v4.9 · Hecha en Chiriquí 🇵🇦 · Tus datos se guardan solo en este navegador.
     </div>
   </section>
 </div>
@@ -1043,8 +1029,10 @@
   <button class="mh-close" onclick="event.stopPropagation();cerrarModoHora()" title="Salir">✕</button>
   <div class="grande" id="mhHora">--:--</div>
   <div class="seg" id="mhSeg"></div>
-  <div class="sub" id="mhFecha"></div>
-  <div class="prox-bus" id="mhProx">Próximo bus: --</div>
+  <div class="mh-info">
+    <div class="sub" id="mhFecha"></div>
+    <div class="prox-bus" id="mhProx">Próximo bus: --</div>
+  </div>
   <div class="salir-hint">Toca en cualquier lugar para salir</div>
 </div>
 
@@ -1259,6 +1247,7 @@ function aplicarTema(){
   document.documentElement.setAttribute('data-tema', estado.tema === 'claro' ? 'claro' : 'oscuro');
   document.documentElement.setAttribute('data-modo', estado.modoLigero ? 'ligero' : 'normal');
   document.documentElement.setAttribute('data-hora', estado.horaHorizontal ? 'horizontal' : 'normal');
+  aplicarOrientacion();
   const btnT = document.getElementById('btnTema');
   if(btnT) btnT.textContent = estado.tema === 'claro' ? '☀️' : '🌙';
   const btnL = document.getElementById('btnLigero');
@@ -1272,6 +1261,12 @@ function aplicarTema(){
       document.documentElement.style.setProperty('--blue2', t.col2);
     }
   }
+}
+/* El reloj se pone horizontal solo cuando el celular gira, o si el botón está activo */
+function aplicarOrientacion(){
+  let land = false;
+  try{ land = window.matchMedia('(orientation: landscape)').matches; }catch(e){}
+  document.documentElement.setAttribute('data-hora-land', (land || estado.horaHorizontal) ? '1' : '0');
 }
 function setTema(t){ estado.tema = t; aplicarTema(); guardar(); toast(t==='claro' ? 'Modo claro ☀️' : 'Modo oscuro 🌙'); }
 function toggleTema(){ setTema(estado.tema === 'claro' ? 'oscuro' : 'claro'); }
@@ -3277,6 +3272,16 @@ function pintarTodo(){
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape') cerrarModoHora();
 });
+
+/* Recalcular el reloj horizontal cuando el celular gira */
+try{
+  const mqHora = window.matchMedia('(orientation: landscape)');
+  const refrescarHora = function(){ aplicarOrientacion(); };
+  if(mqHora.addEventListener) mqHora.addEventListener('change', refrescarHora);
+  else if(mqHora.addListener) mqHora.addListener(refrescarHora);
+}catch(e){}
+window.addEventListener('orientationchange', function(){ setTimeout(aplicarOrientacion, 150); });
+window.addEventListener('resize', aplicarOrientacion);
 
 cargar();
 aplicarTema();

@@ -1,4 +1,4 @@
-const CACHE = 'mr-v49';
+const CACHE = 'mr-v50';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {

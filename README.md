@@ -44,7 +44,7 @@ y cuánto llevan gastado en transporte.
 
 ### APK (Android)
 1. Ve a [Releases](https://github.com/magdalenagonzalez08/mr-buses/releases)
-2. Descarga `MR-Buses-v1.0.apk`
+2. Descarga `MR-Buses-v4.9.apk`
 3. Ábrelo en tu celular y instala
 
 ### Navegador
